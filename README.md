@@ -2,4 +2,5 @@
 
 ### Members
 Wei Siew Liew
+Colin Liechty
 
