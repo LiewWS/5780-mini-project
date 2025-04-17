@@ -40,9 +40,9 @@ void send_main(void)
 {
     // Initialize USART for bluetooth (from checkpoint 1)
     HAL_RCC_GPIOA_CLK_ENABLE();
-    HAL_RCC_USART3_CLK_ENABLE();
+    HAL_RCC_USART1_CLK_ENABLE();
 
-    configure_TTL(USART3, HAL_RCC_GetHCLKFreq()/9600);
+    configure_TTL(USART1, HAL_RCC_GetHCLKFreq()/9600);
     // USART1 TX Pin (connect to RX of bluetooth)
     GPIO_InitTypeDef init_pa9 = {GPIO_PIN_9, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 1};
     HAL_GPIO_Init(GPIOA, &init_pa9);
@@ -70,7 +70,7 @@ void send_main(void)
             writtenData[0] = 0x0D;
             write_i2c(writtenData, MAG_ADDR, 1);
             angle |= read_i2c(MAG_ADDR);
-            send_angle(USART3, angle);
+            send_angle(USART1, angle);
         }
     }
 }
@@ -113,8 +113,8 @@ void recv_main(void)
 
     // Initialize USART for bluetooth (from checkpoint 1)
     HAL_RCC_GPIOA_CLK_ENABLE();
-    HAL_RCC_USART3_CLK_ENABLE();
-    configure_TTL_RXint(USART3, HAL_RCC_GetHCLKFreq()/9600);
+    HAL_RCC_USART1_CLK_ENABLE();
+    configure_TTL_RXint(USART1, HAL_RCC_GetHCLKFreq()/9600);
     // USART1 TX Pin (connect to RX of bluetooth)
     GPIO_InitTypeDef init_pa9 = {GPIO_PIN_9, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 1};
     HAL_GPIO_Init(GPIOA, &init_pa9);
@@ -122,8 +122,8 @@ void recv_main(void)
     GPIO_InitTypeDef init_pa10 = {GPIO_PIN_10, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 1};
     HAL_GPIO_Init(GPIOA, &init_pa10);
     // Set up NVIC
-    NVIC_EnableIRQ(USART3_4_IRQn);
-    NVIC_SetPriority(USART3_4_IRQn, 1);
+    NVIC_EnableIRQ(USART1_IRQn);
+    NVIC_SetPriority(USART1_IRQn, 1);
 
     // Initialize receive buffer
     buf_head = 0;
@@ -156,9 +156,9 @@ void recv_main(void)
     }
 }
 
-void USART3_4_IRQHandler(void)
+void USART1_IRQHandler(void)
 {
-    recv_buf[buf_head] = (char) USART3->RDR;
+    recv_buf[buf_head] = (char) USART1->RDR;
     inc_idx(&buf_head);
 }
 
