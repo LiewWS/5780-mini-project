@@ -133,7 +133,7 @@ void recv_main(void)
 
     while (1) {
         // Main loop
-        angle = read_angle();
+        angle = read_angle(angle);
 
         if (angle < 1000)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
