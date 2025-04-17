@@ -10,3 +10,4 @@ int magnetic_encoder_main(void);
 void init_i2c();
 uint8_t write_i2c(uint8_t* sent_dat, uint8_t sent_addr, uint8_t num_bytes);
 uint8_t read_i2c(uint8_t addr);
+
