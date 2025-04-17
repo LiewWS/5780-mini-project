@@ -12,7 +12,7 @@ void send_main(void);
 void recv_main(void);
 
 #define BUF_SIZE 128
-uint8_t recv_buf[BUF_SIZE]
+uint8_t recv_buf[BUF_SIZE];
 uint8_t buf_head;
 uint8_t buf_tail;
 
@@ -91,7 +91,7 @@ void send_angle(USART_TypeDef* USARTx, uint16_t angle)
     USART_send_byte(USARTx, b1);
 
     // Send separator byte
-    USART_send_byte(USARTx, SEP_BYTE)
+    USART_send_byte(USARTx, SEP_BYTE);
 }
 
 void recv_main(void)
@@ -182,4 +182,5 @@ uint16_t read_angle(uint16_t angle) {
             return new_angle;
         }
     }
+    return new_angle;
 }
