@@ -388,10 +388,10 @@ uint8_t write_i2c(uint8_t *sent_dat, uint8_t sent_addr, uint8_t num_bytes)
         while (!((I2C2->ISR & I2C_ISR_TXIS_Msk) | (I2C2->ISR & I2C_ISR_NACKF_Msk)))
         {
         }
-
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
+        
         if (I2C2->ISR & I2C_ISR_NACKF_Msk)
         {
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
             return 1;
         }
         else if (I2C2->ISR & I2C_ISR_TXIS_Msk)

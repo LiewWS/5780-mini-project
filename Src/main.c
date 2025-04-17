@@ -9,7 +9,7 @@ int main(void)
   magnetic_encoder_main();
   #elif defined(TEST)
   test_main();
-  #elif defined(BT_ENC)
+  #elif defined(BTENC)
   bt_magnetic_enc_main();
   #elif defined(LAB5)
   lab5_main();
