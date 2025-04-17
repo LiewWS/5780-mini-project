@@ -53,7 +53,7 @@ void send_main(void)
     // Initialize I2C for magnetic encoder (from checkpoint 2)
     init_i2c();
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, 0);
-    uint8_t writtenData[0] = {0x0B};
+    uint8_t writtenData[1] = {0x0B};
     write_i2c(writtenData, MAG_ADDR, 1);
     uint8_t status = read_i2c(MAG_ADDR);
     uint16_t angle = 0;
