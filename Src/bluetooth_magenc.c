@@ -45,7 +45,7 @@ void send_main(void)
     // Initialize USART for bluetooth (from checkpoint 1)
     HAL_RCC_GPIOA_CLK_ENABLE();
     HAL_RCC_USART1_CLK_ENABLE();
-    HAL_RCC_USART1_CLK_ENABLE();
+
 
     configure_TTL(USART1, HAL_RCC_GetHCLKFreq()/9600);
     // USART1 TX Pin (connect to RX of bluetooth)
@@ -58,7 +58,6 @@ void send_main(void)
     // Initialize I2C for magnetic encoder (from checkpoint 2)
     init_i2c();
     uint8_t writtenData[1] = {0x0B};
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
     write_i2c(writtenData, MAG_ADDR, 1);
     uint8_t status = read_i2c(MAG_ADDR);
     uint16_t angle = 0;
