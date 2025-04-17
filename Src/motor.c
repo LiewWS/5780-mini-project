@@ -15,11 +15,25 @@ volatile int16_t error = 0;         	// Speed error signal
 volatile uint8_t Kp = 25;            	// Proportional gain
 volatile uint8_t Ki = 1;            	// Integral gain
 
+volatile uint8_t direction = 0;
 
 
 // Sets up the entire motor drive system
 void motor_init(void) {
     pwm_init();
+    tim6_init();
+}
+
+void LED_init(void) {
+    // Initialize PC8 and PC9 for LED's
+    RCC->AHBENR |= RCC_AHBENR_GPIOCEN;                                          // Enable peripheral clock to GPIOC
+    GPIOC->MODER |= GPIO_MODER_MODER8_0 | GPIO_MODER_MODER9_0;                  // Set PC8 & PC9 to outputs
+    GPIOC->OTYPER &= ~(GPIO_OTYPER_OT_8 | GPIO_OTYPER_OT_9);                    // Set to push-pull output type
+    GPIOC->OSPEEDR &= ~((GPIO_OSPEEDR_OSPEEDR8_0 | GPIO_OSPEEDR_OSPEEDR8_1) |
+                        (GPIO_OSPEEDR_OSPEEDR9_0 | GPIO_OSPEEDR_OSPEEDR9_1));   // Set to low speed
+    GPIOC->PUPDR &= ~((GPIO_PUPDR_PUPDR8_0 | GPIO_PUPDR_PUPDR8_1) |
+                      (GPIO_PUPDR_PUPDR9_0 | GPIO_PUPDR_PUPDR9_1));             // Set to no pull-up/down
+    GPIOC->ODR &= ~(GPIO_ODR_8 | GPIO_ODR_9);                                   // Shut off LED's
 }
 
 // Sets up the PWM and direction signals to drive the H-Bridge
@@ -34,12 +48,17 @@ void pwm_init(void) {
     GPIOA->AFR[0] |= (1 << 18);
 
     // Set up a PA5, PA6 as GPIO output pins for motor direction control
-    GPIOA->MODER &= 0xFFFFC3FF; // clear PA5, PA6 bits,
-    GPIOA->MODER |= (1 << 10) | (1 << 12);
+    GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6); // clear PA5, PA6 bits,
+    GPIOA->MODER |= (1 << GPIO_MODER_MODER5_Pos) | (1 << GPIO_MODER_MODER6_Pos);
     
+    //GPIOA->MODER = (GPIOA->MODER & ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6)) | GPIO_MODER_MODER13_1 | GPIO_MODER_MODER11_1;
+
     //Initialize one direction pin to high, the other low
-    GPIOA->ODR |= (1 << 5);
-    GPIOA->ODR &= ~(1 << 6);
+     GPIOA->ODR |= (1 << 6);
+     GPIOA->ODR &= ~(1 << 5);
+
+    // GPIOA->ODR &= ~(1 << 6);
+    //  GPIOA->ODR |= (1 << 5);
 
     // Set up PWM timer
     RCC->APB1ENR |= RCC_APB1ENR_TIM14EN;
@@ -77,8 +96,11 @@ void TIM6_DAC_IRQHandler(void) {
     TIM3->CNT = 0x7FFF; // Reset back to center point
     
     // Call the PI update function
-    pwm_update();
+
+
+    pwm_update(direction);
     TIM6->SR &= ~TIM_SR_UIF;        // Acknowledge the interrupt
+
 }
 
 // Set the duty cycle of the PWM, accepts (0-100)
@@ -89,8 +111,45 @@ void pwm_setDutyCycle(uint8_t duty) {
     }
 }
 
-void pwm_update(void)
-{
-    pwm_setDutyCycle(0);
+void pwm_update(uint8_t dir)
+{   
+    // if(dir == 1) pwm_setDutyCycle(57);
+    // else pwm_setDutyCycle(43);
+
+    pwm_setDutyCycle(70);
+
 }
+
+void motor_main(void)
+{
+    HAL_Init();                             // Initialize HAL internals
+    SystemClock_Config();
+    LED_init();
+
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+
+    motor_init();
+
+    //uint8_t forward = 1;
+
+    while(1)
+    {
+        
+        HAL_Delay(3000);
+
+
+        GPIOC->ODR ^= GPIO_ODR_9;
+
+       // direction = (direction == 0);
+
+        GPIOA->ODR ^=  (1 << 5);
+        GPIOA->ODR ^= (1 << 6);
+
+
+
+    }
+
+}
+
+
 

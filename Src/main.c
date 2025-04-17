@@ -11,8 +11,8 @@ int main(void)
   test_main();
   #elif defined(BTENC)
   bt_magnetic_enc_main();
-  #elif defined(LAB5)
-  lab5_main();
+  #elif defined(MTR)
+  motor_main();
   #elif defined(LAB6)
   lab6_main();
   #elif defined(LAB7)
