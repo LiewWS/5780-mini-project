@@ -1,5 +1,6 @@
 #include "magnetic_encoder.h"
 #include "hal_usart.h"
+#include "main.h"
 
 #define SENDER
 // Reserve byte value 0xff to separate angles
