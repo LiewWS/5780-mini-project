@@ -1,6 +1,8 @@
 #include <stm32f0xx_hal.h>
 #include <assert.h>
 #include <stdio.h>
+#include "main.h"
+#include "hal_usart.h"
 
 int test_main(void) {
     HAL_Init(); //resest of all peripherals, init the flash and systick

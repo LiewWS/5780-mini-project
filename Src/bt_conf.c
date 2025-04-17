@@ -101,11 +101,11 @@ void control_LED(char led_sel)
     }
 }
 
-void USART3_4_IRQHandler(void)
+/* void USART3_4_IRQHandler(void)
 {
   char c = (char) USART3->RDR;
 #if (TEST_BT_CONNECT == 1)
   control_LED(c);
 #endif
-}
+} */
 

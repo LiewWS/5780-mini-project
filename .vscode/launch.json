@@ -12,11 +12,11 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "C:/Users/colin/5780-mini-project/.pio/build/bt_conf/firmware.elf",
+            "executable": "C:/Users/willc/5780-mini-project/.pio/build/bt_conf/firmware.elf",
             "projectEnvName": "bt_conf",
-            "toolchainBinDir": "C:/Users/colin/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/willc/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/colin/.platformio/platforms/ststm32/misc/svd/STM32F072x.svd",
+            "svdPath": "C:/Users/willc/.platformio/platforms/ststm32/misc/svd/STM32F072x.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug"
@@ -26,21 +26,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "C:/Users/colin/5780-mini-project/.pio/build/bt_conf/firmware.elf",
+            "executable": "C:/Users/willc/5780-mini-project/.pio/build/bt_conf/firmware.elf",
             "projectEnvName": "bt_conf",
-            "toolchainBinDir": "C:/Users/colin/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/willc/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/colin/.platformio/platforms/ststm32/misc/svd/STM32F072x.svd"
+            "svdPath": "C:/Users/willc/.platformio/platforms/ststm32/misc/svd/STM32F072x.svd"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "C:/Users/colin/5780-mini-project/.pio/build/bt_conf/firmware.elf",
+            "executable": "C:/Users/willc/5780-mini-project/.pio/build/bt_conf/firmware.elf",
             "projectEnvName": "bt_conf",
-            "toolchainBinDir": "C:/Users/colin/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "toolchainBinDir": "C:/Users/willc/.platformio/packages/toolchain-gccarmnoneeabi/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/colin/.platformio/platforms/ststm32/misc/svd/STM32F072x.svd",
+            "svdPath": "C:/Users/willc/.platformio/platforms/ststm32/misc/svd/STM32F072x.svd",
             "loadMode": "manual"
         }
     ]

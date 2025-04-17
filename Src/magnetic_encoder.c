@@ -4,7 +4,7 @@ uint16_t I2C2_Read_ISR(uint32_t bit);
 void I2C_Write(uint8_t data);
 uint8_t I2C_Read();
 void setup_USART(void);
-void printR(char *comment, u_int32_t reg);
+void printR(char *comment, uint32_t reg);
 void printD(char *comment, int32_t numb);
 void My_HAL_GPIO_AF(GPIO_TypeDef *GPIOx, uint16_t pin, uint16_t mode);
 
@@ -13,7 +13,7 @@ int magnetic_encoder_main(void)
 
     init_i2c();
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, 0);
-    uint8_t writtenData[0] = {0x0B};
+    uint8_t writtenData[1] = {0x0B};
     write_i2c(writtenData, MAG_ADDR, 1);
     uint8_t status = read_i2c(MAG_ADDR);
     uint16_t angle = 0;
@@ -388,10 +388,10 @@ uint8_t write_i2c(uint8_t *sent_dat, uint8_t sent_addr, uint8_t num_bytes)
         while (!((I2C2->ISR & I2C_ISR_TXIS_Msk) | (I2C2->ISR & I2C_ISR_NACKF_Msk)))
         {
         }
-
+       
+        
         if (I2C2->ISR & I2C_ISR_NACKF_Msk)
         {
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
             return 1;
         }
         else if (I2C2->ISR & I2C_ISR_TXIS_Msk)
