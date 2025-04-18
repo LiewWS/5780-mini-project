@@ -33,7 +33,8 @@ void LED_init(void) {
                         (GPIO_OSPEEDR_OSPEEDR9_0 | GPIO_OSPEEDR_OSPEEDR9_1));   // Set to low speed
     GPIOC->PUPDR &= ~((GPIO_PUPDR_PUPDR8_0 | GPIO_PUPDR_PUPDR8_1) |
                       (GPIO_PUPDR_PUPDR9_0 | GPIO_PUPDR_PUPDR9_1));             // Set to no pull-up/down
-    GPIOC->ODR &= ~(GPIO_ODR_8 | GPIO_ODR_9);                                   // Shut off LED's
+    GPIOC->ODR &= ~(GPIO_ODR_9);                                   // Shut off LED's
+    GPIOC->ODR |= GPIO_ODR_8;
 }
 
 // Sets up the PWM and direction signals to drive the H-Bridge
@@ -48,14 +49,23 @@ void pwm_init(void) {
     GPIOA->AFR[0] |= (1 << 18);
 
     // Set up a PA5, PA6 as GPIO output pins for motor direction control
-    GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6); // clear PA5, PA6 bits,
-    GPIOA->MODER |= (1 << GPIO_MODER_MODER5_Pos) | (1 << GPIO_MODER_MODER6_Pos);
-    
+    //GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6); // clear PA5, PA6 bits,
+    //GPIOA->MODER |= (1 << GPIO_MODER_MODER5_Pos) | (1 << GPIO_MODER_MODER6_Pos);
+    uint16_t ledPins = GPIO_PIN_6 | GPIO_PIN_5;
+
+    // init LEDs in case needed for debugging
+    GPIO_InitTypeDef initMTROUT = {ledPins,
+                                GPIO_MODE_OUTPUT_PP,
+                                GPIO_SPEED_FREQ_LOW,
+                                GPIO_NOPULL};
+    HAL_GPIO_Init(GPIOA, &initMTROUT);
     //GPIOA->MODER = (GPIOA->MODER & ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6)) | GPIO_MODER_MODER13_1 | GPIO_MODER_MODER11_1;
 
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
     //Initialize one direction pin to high, the other low
-     GPIOA->ODR |= (1 << 6);
-     GPIOA->ODR &= ~(1 << 5);
+     //GPIOA->ODR |= (1 << 6);
+     //GPIOA->ODR &= ~(1 << 5);
 
     // GPIOA->ODR &= ~(1 << 6);
     //  GPIOA->ODR |= (1 << 5);
@@ -93,7 +103,7 @@ void tim6_init(void)
 
 void TIM6_DAC_IRQHandler(void) {
 
-    TIM3->CNT = 0x7FFF; // Reset back to center point
+    
     
     // Call the PI update function
 
@@ -116,7 +126,7 @@ void pwm_update(uint8_t dir)
     // if(dir == 1) pwm_setDutyCycle(57);
     // else pwm_setDutyCycle(43);
 
-    pwm_setDutyCycle(70);
+    pwm_setDutyCycle(60);
 
 }
 
@@ -128,8 +138,9 @@ void motor_main(void)
 
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 
-    motor_init();
-
+    pwm_init();
+    pwm_setDutyCycle(60);
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
     //uint8_t forward = 1;
 
     while(1)
@@ -137,13 +148,14 @@ void motor_main(void)
         
         HAL_Delay(3000);
 
-
+        // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5 | GPIO_PIN_6);
         GPIOC->ODR ^= GPIO_ODR_9;
+        GPIOC->ODR ^= GPIO_ODR_8;
 
        // direction = (direction == 0);
 
-        GPIOA->ODR ^=  (1 << 5);
-        GPIOA->ODR ^= (1 << 6);
+        //GPIOA->ODR ^=  (1 << 5);
+        //GPIOA->ODR ^= (1 << 6);
 
 
 
