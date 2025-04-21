@@ -30,7 +30,7 @@ void inc_idx(uint8_t *idx)
     }
 }
 
-int bt_magnetic_enc_main(void)
+int bt_magnetic_enc_serial_main(void)
 {
 #if defined(SENDER)
     send_main();

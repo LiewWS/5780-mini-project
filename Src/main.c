@@ -13,8 +13,8 @@ int main(void)
   bt_magnetic_enc_main();
   #elif defined(MTR)
   motor_main();
-  #elif defined(LAB6)
-  lab6_main();
+  #elif defined(BTENCSER)
+  bt_magnetic_enc_serial_main();
   #elif defined(LAB7)
   lab7_main();
   #else
