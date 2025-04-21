@@ -40,7 +40,7 @@ int bt_magnetic_enc_serial_main(void)
     return 1;
 }
 
-void send_main(void)
+static void send_main(void)
 {
     // Initialize USART for bluetooth (from checkpoint 1)
     HAL_RCC_GPIOA_CLK_ENABLE();
@@ -101,29 +101,8 @@ void send_main(void)
     }
 }
 
-void send_angle(USART_TypeDef *USARTx, uint16_t angle)
-{
-    uint8_t b0 = (uint8_t)((angle >> 8) & 0x00FF);
-    if (b0 == SEP_BYTE)
-    {
-        // SEP_BYTE = 0xFF
-        b0 = 0x7F;
-    }
-    USART_send_byte(USARTx, b0);
 
-    uint8_t b1 = (uint8_t)(angle & 0x00FF);
-    if (b1 == SEP_BYTE)
-    {
-        // SEP_BYTE = 0xFF
-        b1 = 0xFE;
-    }
-    USART_send_byte(USARTx, b1);
-
-    // Send separator byte
-    USART_send_byte(USARTx, SEP_BYTE);
-}
-
-void recv_main(void)
+static void recv_main(void)
 {
     // Initialize LEDs
     HAL_RCC_GPIOC_CLK_ENABLE();
@@ -204,34 +183,4 @@ void USART1_IRQHandler(void)
     inc_idx(&buf_head);
 }
 
-uint16_t read_angle(uint16_t angle)
-{
-    uint16_t new_angle = angle;
-    if (buf_head > buf_tail)
-    {
-        if (recv_buf[buf_tail] == SEP_BYTE)
-        {
-            // Step over separator byte and return old angle
-            inc_idx(&buf_tail);
-            return new_angle;
-        }
-        else
-        {
-            angle = recv_buf[buf_tail] << 8;
-            inc_idx(&buf_tail);
-            if (recv_buf[buf_tail] == SEP_BYTE)
-            {
-                // Step over separator byte and return old angle
-                inc_idx(&buf_tail);
-            }
-            else
-            {
-                // Here we got two consecutive data bytes
-                new_angle = angle + recv_buf[buf_tail];
-                inc_idx(&buf_tail);
-            }
-            return new_angle;
-        }
-    }
-    return new_angle;
-}
+

@@ -17,7 +17,7 @@ uint8_t recv_buf[BUF_SIZE];
 uint8_t buf_head;
 uint8_t buf_tail;
 
-void inc_idx(uint8_t *idx)
+static void inc_idx(uint8_t *idx)
 {
     uint8_t cur_idx = *idx;
     if (cur_idx >= BUF_SIZE)
@@ -40,7 +40,7 @@ int bt_magnetic_enc_main(void)
     return 1;
 }
 
-void send_main(void)
+static void send_main(void)
 {
     // Initialize USART for bluetooth (from checkpoint 1)
     HAL_RCC_GPIOA_CLK_ENABLE();
@@ -123,7 +123,7 @@ void send_angle(USART_TypeDef *USARTx, uint16_t angle)
     USART_send_byte(USARTx, SEP_BYTE);
 }
 
-void recv_main(void)
+static void recv_main(void)
 {
     // Initialize LEDs
     HAL_RCC_GPIOC_CLK_ENABLE();
