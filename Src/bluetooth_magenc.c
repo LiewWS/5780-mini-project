@@ -187,11 +187,11 @@ void recv_main(void)
     }
 }
 
-void USART1_IRQHandler(void)
-{
-    recv_buf[buf_head] = (char)USART1->RDR;
-    inc_idx(&buf_head);
-}
+// void USART1_IRQHandler(void)
+// {
+//     recv_buf[buf_head] = (char)USART1->RDR;
+//     inc_idx(&buf_head);
+// }
 
 uint16_t read_angle(uint16_t angle)
 {
