@@ -10,6 +10,8 @@ void USART_send_byte(USART_TypeDef* USARTx, char data);
 void USART_send_string(USART_TypeDef* USARTx, char* data);
 char USART_recv_byte(USART_TypeDef* USARTx);
 
+void USART_printD(USART_TypeDef* USARTx, int32_t numb);
+
 void send_angle(USART_TypeDef* USARTx, uint16_t angle);
 uint16_t read_angle(uint16_t old_angle);
 

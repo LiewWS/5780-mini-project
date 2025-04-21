@@ -1,4 +1,5 @@
 #include "hal_usart.h"
+#include <stdio.h>
 
 void configure_TTL(USART_TypeDef* USARTx, uint32_t brr_val) 
 {
@@ -41,4 +42,9 @@ char USART_recv_byte(USART_TypeDef* USARTx)
     return val;
 }
 
-
+void USART_printD(USART_TypeDef* USARTx, int32_t numb)
+{
+    char str[10];
+    snprintf(str, sizeof(str), "%d", numb);
+    USART_send_string(USARTx, str);
+}
