@@ -3,6 +3,8 @@
 #include "main.h"
 #include "bluetooth_buf.h"
 
+void setup_USART(void);
+
 static void send_main(void)
 {
     // Initialize USART for bluetooth (from checkpoint 1)
@@ -97,13 +99,7 @@ static void recv_main(void)
 
     // Initialize USART for serial
     HAL_RCC_USART3_CLK_ENABLE();
-    configure_TTL(USART3, HAL_RCC_GetHCLKFreq()/115200);
-    // USART3 TX Pin (connect to RX of serial converter)
-    GPIO_InitTypeDef init_pb10 = {GPIO_PIN_10, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 4};
-    HAL_GPIO_Init(GPIOB, &init_pb10);
-    // USART3 RX Pin (connect to TX of serial converter)
-    GPIO_InitTypeDef init_pb11 = {GPIO_PIN_11, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 4};
-    HAL_GPIO_Init(GPIOB, &init_pb11);
+    setup_USART();
 
     // Initialize receive buffer
     buf_head = 0;
