@@ -9,15 +9,12 @@
 
 #define SEP_BYTE 0xFF
 
-void send_main(void);
-void recv_main(void);
-
 #define BUF_SIZE 128
 uint8_t recv_buf[BUF_SIZE];
 uint8_t buf_head;
 uint8_t buf_tail;
 
-void inc_idx(uint8_t *idx)
+static void inc_idx(uint8_t *idx)
 {
     uint8_t cur_idx = *idx;
     if (cur_idx >= BUF_SIZE)
@@ -28,16 +25,6 @@ void inc_idx(uint8_t *idx)
     {
         *idx = cur_idx + 1;
     }
-}
-
-int bt_magnetic_enc_serial_main(void)
-{
-#if defined(SENDER)
-    send_main();
-#else
-    recv_main();
-#endif
-    return 1;
 }
 
 static void send_main(void)
@@ -175,6 +162,16 @@ static void recv_main(void)
         else
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
     }
+}
+
+int bt_magnetic_enc_serial_main(void)
+{
+#if defined(SENDER)
+    send_main();
+#else
+    recv_main();
+#endif
+    return 1;
 }
 
 void USART1_IRQHandler(void)

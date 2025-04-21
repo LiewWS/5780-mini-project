@@ -9,8 +9,8 @@
 
 #define SEP_BYTE 0xFF
 
-void send_main(void);
-void recv_main(void);
+static void send_main(void);
+static void recv_main(void);
 
 #define BUF_SIZE 128
 uint8_t recv_buf[BUF_SIZE];
