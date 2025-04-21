@@ -71,9 +71,11 @@ void PendSV_Handler(void)
   * @retval None
   */
 // volatile int blue_count = 0;
+volatile uint32_t tick_count = 0;
 void SysTick_Handler(void)
 {
     HAL_IncTick();
+    ++tick_count;
     // if (blue_count >= 200) {
     //   HAL_GPIO_TogglePin(GPIOC, 7);
     //   blue_count = 0;
