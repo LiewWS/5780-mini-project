@@ -1,8 +1,6 @@
 #ifndef BLUETOOTH_BUF_H
 #define BLUETOOTH_BUF_H
 
-#include <stdint.h>
-
 #define SENDER
 // Reserve byte value 0xff to separate angles
 // Max value = 0x7FFE

@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 uint8_t recv_buf[BUF_SIZE];
 uint8_t buf_head;
 uint8_t buf_tail;
