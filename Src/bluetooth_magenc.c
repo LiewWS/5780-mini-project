@@ -1,34 +1,10 @@
 #include "magnetic_encoder.h"
 #include "hal_usart.h"
 #include "main.h"
-
-#define SENDER
-// Reserve byte value 0xff to separate angles
-// Max value = 0x7FFE
-// Small error low byte is 0xFF by changing it to 0xFE
-
-#define SEP_BYTE 0xFF
+#include "bluetooth_buf.h"
 
 static void send_main(void);
 static void recv_main(void);
-
-#define BUF_SIZE 128
-uint8_t recv_buf[BUF_SIZE];
-uint8_t buf_head;
-uint8_t buf_tail;
-
-static void inc_idx(uint8_t *idx)
-{
-    uint8_t cur_idx = *idx;
-    if (cur_idx >= BUF_SIZE)
-    {
-        *idx = 0;
-    }
-    else
-    {
-        *idx = cur_idx + 1;
-    }
-}
 
 int bt_magnetic_enc_main(void)
 {
@@ -186,12 +162,6 @@ static void recv_main(void)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
     }
 }
-
-// void USART1_IRQHandler(void)
-// {
-//     recv_buf[buf_head] = (char)USART1->RDR;
-//     inc_idx(&buf_head);
-// }
 
 uint16_t read_angle(uint16_t angle)
 {
