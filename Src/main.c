@@ -15,8 +15,8 @@ int main(void)
   motor_main();
   #elif defined(BTENCSER)
   bt_magnetic_enc_serial_main();
-  #elif defined(LAB7)
-  lab7_main();
+  #elif defined(PROJMAIN)
+  project_main();
   #else
   #error No valid target specified
   #endif
