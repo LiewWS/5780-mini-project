@@ -10,7 +10,7 @@ void My_HAL_GPIO_AF(GPIO_TypeDef *GPIOx, uint16_t pin, uint16_t mode);
 
 int magnetic_encoder_main(void)
 {
-
+    HAL_Init();
     init_i2c();
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9, 0);
     uint8_t writtenData[1] = {0x0B};
@@ -289,8 +289,6 @@ void My_HAL_GPIO_AF(GPIO_TypeDef *GPIOx, uint16_t pin, uint16_t mode)
 
 void init_i2c()
 {
-    HAL_Init();
-
     RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
     RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
 

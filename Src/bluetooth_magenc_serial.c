@@ -76,6 +76,8 @@ static void recv_main(void)
 
 int bt_magnetic_enc_serial_main(void)
 {
+    HAL_Init();
+    SystemClock_Config();
 #if defined(SENDER)
     send_main();
 #else
