@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stm32f0xx_hal.h>
+#include "bluetooth_buf.h"
 
 uint8_t recv_buf[BUF_SIZE];
 uint8_t buf_head;
