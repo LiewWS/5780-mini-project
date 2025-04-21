@@ -16,7 +16,7 @@ int bt_magnetic_enc_main(void)
     return 1;
 }
 
-static void send_main(void)
+void send_main(void)
 {
     // Initialize USART for bluetooth (from checkpoint 1)
     HAL_RCC_GPIOA_CLK_ENABLE();
@@ -51,6 +51,7 @@ static void send_main(void)
             writtenData[0] = 0x0D;
             write_i2c(writtenData, MAG_ADDR, 1);
             angle |= read_i2c(MAG_ADDR);
+#if defined(DEBUG)
             if (angle < 1000)
                 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
             else
@@ -71,6 +72,7 @@ static void send_main(void)
             }
             else
                 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
+#endif
 
             send_angle(USART1, angle);
         }

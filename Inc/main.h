@@ -19,3 +19,6 @@ void HAL_config_EXTI(uint32_t line_num, uint32_t control);
 
 int bt_conf_main(void);
 int bt_magnetic_enc_main(void);
+void send_main(void);
+
+#define DEBUG
