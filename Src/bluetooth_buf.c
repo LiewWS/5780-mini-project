@@ -1,14 +1,9 @@
 #include <stdint.h>
+#include <stm32f0xx_hal.h>
 
 uint8_t recv_buf[BUF_SIZE];
 uint8_t buf_head;
 uint8_t buf_tail;
-
-void USART1_IRQHandler(void)
-{
-    recv_buf[buf_head] = (char)USART1->RDR;
-    inc_idx(&buf_head);
-}
 
 void inc_idx(uint8_t *idx)
 {
@@ -21,5 +16,11 @@ void inc_idx(uint8_t *idx)
     {
         *idx = cur_idx + 1;
     }
+}
+
+void USART1_IRQHandler(void)
+{
+    recv_buf[buf_head] = (char)USART1->RDR;
+    inc_idx(&buf_head);
 }
 
