@@ -321,8 +321,8 @@ void init_i2c()
     GPIOB->OTYPER |= (GPIO_OTYPER_OT_11 | GPIO_OTYPER_OT_13);
 
     // set AF1 and AF5
-    GPIOB->AFR[1] |= 0x01 << GPIO_AFRH_AFSEL11_Pos;
-    GPIOB->AFR[1] |= 0x05 << GPIO_AFRH_AFSEL13_Pos;
+    GPIOB->AFR[1] |= 0x01 << GPIO_AFRH_AFSEL11_Pos; // sda
+    GPIOB->AFR[1] |= 0x05 << GPIO_AFRH_AFSEL13_Pos; // scl
 
     // SET PB14 and PC0 to high
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, 1);
