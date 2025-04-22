@@ -70,6 +70,7 @@ static void recv_main(void)
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
             count = 0;
         }
+        ++count;
     }
 }
 
