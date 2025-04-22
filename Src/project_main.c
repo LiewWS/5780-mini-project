@@ -80,8 +80,8 @@ int project_main()
 
 void calibration_loop()
 {
-    uint32_t debouncer;
-    uint16_t angle;
+    uint32_t debouncer = 0;
+    uint16_t angle = 0;
     uint8_t isCalibrating = 1;
     
     while (isCalibrating) {
