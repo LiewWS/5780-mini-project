@@ -65,12 +65,7 @@ static void recv_main(void)
         else
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 0);
 
-        if (angle > 3000)
-        {
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
-        }
-        else
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
+       HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
     }
 }
 
