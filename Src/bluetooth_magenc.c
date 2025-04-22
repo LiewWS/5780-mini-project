@@ -3,7 +3,6 @@
 #include "main.h"
 #include "bluetooth_buf.h"
 
-static void send_main(void);
 static void recv_main(void);
 
 int bt_magnetic_enc_main(void)
