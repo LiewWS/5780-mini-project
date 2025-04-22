@@ -85,7 +85,7 @@ void calibration_loop()
     uint8_t isCalibrating = 1;
     
     while (isCalibrating) {
-        angle = read_angle();
+        angle = read_angle(angle);
 
         debouncer = (debouncer << 1);
         if(GPIOA->IDR & 1) {
@@ -138,7 +138,7 @@ void balance_loop()
     balance_state_t bstate = SWING_STATE;
 
     while (1) {
-        angle = read_angle();
+        angle = read_angle(angle);
         time = tick_count;
         if (old_time > time) {
             // tick_count overflowed
@@ -151,7 +151,7 @@ void balance_loop()
         }
         anglev = (angle - old_angle) / time_diff;
 
-        bstate = ((angle > LEFT_THRES) && (angle < RIGHT_THRES)) ? SWING_STATE : PID_STATE;
+        bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
         if (bstate == SWING_STATE) {
             if (abs_val(anglev) < abs_val(old_anglev)) {
                 // Passed point of max velocity
