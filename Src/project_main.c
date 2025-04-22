@@ -2,6 +2,7 @@
 #include "magnetic_encoder.h"
 #include "hal_usart.h"
 #include "bluetooth_buf.h"
+#include "motor.h"
 
 // Incremented by systick interrupt
 extern uint32_t tick_count;
@@ -42,7 +43,16 @@ int project_main()
     NVIC_EnableIRQ(USART1_IRQn);
     NVIC_SetPriority(USART1_IRQn, 1);
 
-    // Configure PWM
+    // Configure motor
+    pwm_init();
+    // For motor direction, IN1: PC8, IN2:  PC9
+    uint16_t motor_dir_pins = GPIO_PIN_8 | GPIO_PIN_9;
+    GPIO_InitTypeDef init_motor_dir = {motor_dir_pins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
+    HAL_GPIO_Init(GPIOC, &init_motor_dir);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+    // Stop motor initially
+    pwm_setDutyCycle(0);
 
     calibration_loop();
     balance_loop();
