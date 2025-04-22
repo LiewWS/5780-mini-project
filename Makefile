@@ -1,4 +1,4 @@
-TARGET ?= PROJMAIN
+TARGET ?= BTENCSER
 
 PREFIX = arm-none-eabi-
 CC = $(PREFIX)gcc
