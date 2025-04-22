@@ -44,6 +44,7 @@ static void recv_main(void)
     buf_tail = 0;
 
     uint16_t angle = 0;
+    uint32_t count = 0;
 
     while (1)
     {
@@ -65,7 +66,10 @@ static void recv_main(void)
         else
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 0);
 
-       HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+        if (count == 1000000) {
+            HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
+            count = 0;
+        }
     }
 }
 
