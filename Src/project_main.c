@@ -81,7 +81,7 @@ int project_main()
 void calibration_loop()
 {
     uint32_t debouncer;
-    uint16_t angle
+    uint16_t angle;
     uint8_t isCalibrating = 1;
     
     while (isCalibrating) {
@@ -94,7 +94,7 @@ void calibration_loop()
 
         if (debouncer == 0x7FFFFFFF) {
             initial_angle = angle;
-            pwm_setDutyCycle(50)
+            pwm_setDutyCycle(50);
             isCalibrating = 0;
             break;
         }
