@@ -1,3 +1,5 @@
 build
 .vscode
 .pio
+launch.json
+c_cpp_properties.json
