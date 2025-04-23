@@ -19,9 +19,9 @@ void inc_idx(uint8_t *idx)
     }
 }
 
-void USART1_IRQHandler(void)
-{
-    recv_buf[buf_head] = (char)USART1->RDR;
-    inc_idx(&buf_head);
-}
+// void USART1_IRQHandler(void)
+// {
+//     recv_buf[buf_head] = (char)USART1->RDR;
+//     inc_idx(&buf_head);
+// }
 

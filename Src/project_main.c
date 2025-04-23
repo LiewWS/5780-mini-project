@@ -28,13 +28,18 @@ int project_main()
     SystemClock_Config();
 
 #if defined(SENDER)
-    // I2C: 
+    // I2C: SDA: PB11, SCL: PB13  
     // Bluetooth RXD: PA9, TXD: PA10
-    // send_main();
+    HAL_RCC_GPIOA_CLK_ENABLE();
+    // Initialize user button: PA0
+    GPIOA->MODER &= ~(GPIO_MODER_MODER0_0 | GPIO_MODER_MODER0_1);
+    GPIOC->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0_0 | GPIO_OSPEEDR_OSPEEDR0_1);
+    GPIOC->PUPDR |= GPIO_PUPDR_PUPDR0_1; 
+
     send_pwm();
 #else
     // Enable clock to peripherals
-    HAL_RCC_GPIOA_CLK_ENABLE();
+    
     HAL_RCC_GPIOC_CLK_ENABLE();
     HAL_RCC_USART1_CLK_ENABLE();
 
@@ -44,11 +49,6 @@ int project_main()
     GPIO_InitTypeDef initLED = {ledPins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
     HAL_GPIO_Init(GPIOC, &initLED);
 #endif
-
-    // Initialize user button: PA0
-    GPIOA->MODER &= ~(GPIO_MODER_MODER0_0 | GPIO_MODER_MODER0_1);
-    GPIOC->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0_0 | GPIO_OSPEEDR_OSPEEDR0_1);
-    GPIOC->PUPDR |= GPIO_PUPDR_PUPDR0_1; 
     
     // Configure USART for bluetooth
     configure_TTL_RXint(USART1, HAL_RCC_GetHCLKFreq() / 9600);
@@ -74,11 +74,30 @@ int project_main()
     // Stop motor initially
     pwm_setDutyCycle(0);
 
-    calibration_loop();
-    balance_loop();
+    while (1) {
+        // main loop
+    }
 #endif
 
     return 1;
+}
+
+uint16_t read_magnetic()
+{
+    uint8_t writtenData[1] = {0x0B};
+    write_i2c(writtenData, MAG_ADDR, 1);
+    uint8_t status = read_i2c(0x36);
+    uint16_t angle = 0;
+    if (status & 0x20) {
+        writtenData[0] = 0x0C;
+            write_i2c(writtenData, MAG_ADDR, 1);
+            angle = read_i2c(MAG_ADDR) << 8;
+
+            writtenData[0] = 0x0D;
+            write_i2c(writtenData, MAG_ADDR, 1);
+            angle |= read_i2c(MAG_ADDR);
+    }
+    return angle;
 }
 
 void calibration_loop()
@@ -88,7 +107,7 @@ void calibration_loop()
     uint8_t isCalibrating = 1;
     
     while (isCalibrating) {
-        angle = read_angle(angle);
+        angle = read_magnetic();
 
         debouncer = (debouncer << 1);
         if(GPIOA->IDR & 1) {
@@ -131,6 +150,7 @@ void balance_loop()
     buf_tail = 0;
 
     uint8_t pwm_dc = 0;
+    uint8_t bt_data = 0;
     uint16_t angle = initial_angle;
     uint16_t old_angle = 0;
     uint32_t time = 1;
@@ -141,7 +161,7 @@ void balance_loop()
     balance_state_t bstate = SWING_STATE;
 
     while (1) {
-        angle = read_angle(angle);
+        angle = read_magnetic();
         time = tick_count;
         if (old_time > time) {
             // tick_count overflowed
@@ -158,9 +178,11 @@ void balance_loop()
         if (bstate == SWING_STATE) {
             if (abs_val(anglev) < abs_val(old_anglev)) {
                 // Passed point of max velocity
-                motor_switch_dir();
-                pwm_dc = swing_angle_to_pwm(angle);
-                pwm_setDutyCycle(pwm_dc);
+                bt_data = swing_angle_to_pwm(angle);
+                // Switch direction
+                // Set bit 8 to indicate that direction should be flipped.
+                bt_data |= (1 << 8);
+                USART_send_byte(USART1, bt_data);
             }
         } else if (bstate == PID_STATE) {
             //
@@ -193,45 +215,16 @@ void send_pwm()
     uint8_t status = read_i2c(MAG_ADDR);
     uint16_t angle = 0;
 
-    while (1)
-    {
-        writtenData[0] = 0x0B;
-        write_i2c(writtenData, MAG_ADDR, 1);
-        status = read_i2c(0x36);
-        if (status & 0x20)
-        {
-            writtenData[0] = 0x0C;
-            write_i2c(writtenData, MAG_ADDR, 1);
-            angle = read_i2c(MAG_ADDR) << 8;
+    calibration_loop();
+    balance_loop();
+}
 
-            writtenData[0] = 0x0D;
-            write_i2c(writtenData, MAG_ADDR, 1);
-            angle |= read_i2c(MAG_ADDR);
-#if defined(DEBUG)
-            if (angle < 1000)
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
-            else
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 0);
-
-            if ((angle > 1000) && (angle < 2000))
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
-            else
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
-            if ((angle > 2000) && (angle < 3000))
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 1);
-            else
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 0);
-
-            if (angle > 3000)
-            {
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
-            }
-            else
-                HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
-#endif
-
-            send_angle(USART1, angle);
-        }
+void USART1_IRQHandler(void)
+{
+    uint8_t data = USART1->RDR;
+    pwm_setDutyCycle(data & 0x7F);
+    if ((data & (1 << 8)) > 0) {
+        motor_switch_dir();
     }
 }
 
