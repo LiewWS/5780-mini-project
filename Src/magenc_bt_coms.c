@@ -117,7 +117,6 @@ void send_angle(USART_TypeDef *USARTx, uint16_t angle)
     USART_send_byte(USARTx, SEP_BYTE);
 }
 
-//=====================================================================
 
 void recv_main(void)
 {
