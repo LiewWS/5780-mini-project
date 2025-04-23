@@ -15,6 +15,9 @@ uint8_t read_angle(uint16_t* angle)
         {
             new_angle = recv_buf[buf_tail] << 8;
             inc_idx(&buf_tail);
+            if (buf_head <= buf_tail) {
+                return 0;
+            }
             if (recv_buf[buf_tail] == SEP_BYTE)
             {
                 // Step over separator byte and return old angle
@@ -32,6 +35,7 @@ uint8_t read_angle(uint16_t* angle)
     }
     return 0;
 }
+
 void send_main(void)
 {
     // Initialize USART for bluetooth (from checkpoint 1)
