@@ -2,8 +2,8 @@
 
 int bt_magnetic_enc_main(void)
 {
-    HAL_Init();
-    SystemClock_Config();
+    //HAL_Init();
+    //SystemClock_Config();
 
 #if defined(SENDER)
     send_main();
