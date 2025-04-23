@@ -120,6 +120,26 @@ void calibration_loop()
             isCalibrating = 0;
             break;
         }
+
+        if (angle < 1000)
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
+        else
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 0);
+
+        if ((angle > 1000) && (angle < 2000))
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
+        else
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+        if ((angle > 2000) && (angle < 3000))
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 1);
+        else
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 0);
+
+        if (angle > 3000)
+        {
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+        }
+        else HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
     }
 }
 
