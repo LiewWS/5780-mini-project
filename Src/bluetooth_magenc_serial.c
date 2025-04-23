@@ -50,7 +50,7 @@ static void recv_main(void)
     {
         // Main loop
         angle = read_angle(angle);
-        USART_printD(USART3, angle);
+        //USART_printD(USART3, angle);
 
         if (angle < 1000)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);

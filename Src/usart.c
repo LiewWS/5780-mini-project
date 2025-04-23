@@ -45,7 +45,7 @@ char USART_recv_byte(USART_TypeDef* USARTx)
 void USART_printD(USART_TypeDef* USARTx, int32_t numb)
 {
     char str[10];
-    snprintf(str, sizeof(str), "%d\r\n", numb);
+    snprintf(str, sizeof(str), "%ld\r\n", numb);
     USART_send_string(USARTx, str);
 }
 

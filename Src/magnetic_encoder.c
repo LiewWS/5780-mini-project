@@ -251,7 +251,7 @@ void setup_USART(void)
 void printR(char *comment, uint32_t reg)
 {
     char r[50];
-    sprintf(r, "%s: 0x%08X", comment, reg);
+    sprintf(r, "%s: 0x%08lX", comment, reg);
     USART_send_string(USART3, r);
 }
 
@@ -259,8 +259,10 @@ void printR(char *comment, uint32_t reg)
 void printD(char *comment, int32_t numb)
 {
     char str[20];
-    snprintf(str, sizeof(str), "%d", numb); // Convert hex to a decimal string
-    USART_send_string(USART3, ("%s %s", comment, str));
+    snprintf(str, sizeof(char)*20, "%ld", numb); // Convert hex to a decimal string
+    char str2[40];
+    snprintf(str2, sizeof(char) * 40, "%s %s", comment, str);
+    USART_send_string(USART3, str2);
 }
 
 void My_HAL_GPIO_AF(GPIO_TypeDef *GPIOx, uint16_t pin, uint16_t mode)
