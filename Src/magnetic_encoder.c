@@ -322,15 +322,16 @@ void init_i2c()
 uint8_t read_i2c(uint8_t addr)
 {
     I2C2->CR2 &= ~(I2C_CR2_SADD_Msk | I2C_CR2_RD_WRN_Msk | I2C_CR2_START_Msk | 0x7F << 16);
-
+    
     I2C2->CR2 |= ((addr << 1) | (1 << I2C_CR2_NBYTES_Pos) | I2C_CR2_RD_WRN_Msk);
     I2C2->CR2 |= I2C_CR2_START_Msk;
-
+    
     while (!((I2C2->ISR & I2C_ISR_RXNE_Msk) | (I2C2->ISR & I2C_ISR_NACKF_Msk)))
     {
     }
     if (I2C2->ISR & I2C_ISR_NACKF_Msk)
     {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 1);
         return 1;
     }
     else if (I2C2->ISR & I2C_ISR_RXNE_Msk)
@@ -338,7 +339,7 @@ uint8_t read_i2c(uint8_t addr)
         while (!(I2C2->ISR & I2C_ISR_TC_Msk))
         {
         }
-
+        
         uint8_t hold = I2C2->RXDR;
         I2C2->CR2 |= I2C_CR2_STOP_Msk;
         return hold;
@@ -360,6 +361,7 @@ uint8_t write_i2c(uint8_t *sent_dat, uint8_t sent_addr, uint8_t num_bytes)
         
         if (I2C2->ISR & I2C_ISR_NACKF_Msk)
         {
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
             return 1;
         }
         else if (I2C2->ISR & I2C_ISR_TXIS_Msk)

@@ -52,11 +52,11 @@ void send_main(void)
     write_i2c(writtenData, MAG_ADDR, 1);
     uint8_t status = read_i2c(MAG_ADDR);
     uint16_t angle = 0;
-
     while (1)
     {
         writtenData[0] = 0x0B;
         write_i2c(writtenData, MAG_ADDR, 1);
+        //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
         status = read_i2c(0x36);
         if (status & 0x20)
         {
@@ -67,7 +67,7 @@ void send_main(void)
             writtenData[0] = 0x0D;
             write_i2c(writtenData, MAG_ADDR, 1);
             angle |= read_i2c(MAG_ADDR);
-#if defined(DEBUG)
+//#if defined()
             if (angle < 1000)
                 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
             else
@@ -88,7 +88,7 @@ void send_main(void)
             }
             else
                 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
-#endif
+//#endif
 
             send_angle(USART1, angle);
         }
