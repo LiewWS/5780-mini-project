@@ -14,7 +14,7 @@ int main(void)
   #elif defined(MTR)
   motor_main();
   #elif defined(BTENCSER)
-  bt_magnetic_enc_serial_main();
+  bt_magnetic_enc_main();
   #elif defined(PROJMAIN)
   project_main();
   #else
