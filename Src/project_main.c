@@ -145,11 +145,6 @@ uint8_t swing_angle_to_pwm(uint16_t cur_angle)
 
 void balance_loop()
 {
-    // Initialize receive buffer
-    buf_head = 0;
-    buf_tail = 0;
-
-    uint8_t pwm_dc = 0;
     uint8_t bt_data = 0;
     uint16_t angle = initial_angle;
     uint16_t old_angle = 0;
@@ -213,7 +208,6 @@ void send_pwm()
     uint8_t writtenData[1] = {0x0B};
     write_i2c(writtenData, MAG_ADDR, 1);
     uint8_t status = read_i2c(MAG_ADDR);
-    uint16_t angle = 0;
 
     calibration_loop();
     balance_loop();
