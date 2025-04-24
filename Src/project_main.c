@@ -120,7 +120,7 @@ void calibration_loop()
         if (debouncer == 0x7FFFFFFF)
         {
             initial_angle = angle;
-            pwm_setDutyCycle(50, 0);
+            // pwm_setDutyCycle(50, 0);
             // isCalibrating = 0;
             break;
         }
@@ -149,7 +149,6 @@ uint8_t swing_angle_to_pwm(uint16_t cur_angle)
 
 void balance_loop()
 {
-    uint8_t pwm_dc = 0;
     uint16_t angle = initial_angle;
     uint16_t old_angle = 0;
     uint32_t time = 1;
@@ -179,8 +178,9 @@ void balance_loop()
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
+
+#ifdef DEBUG
         control_byte = angle & 0xFF;
-        
         if (control_byte < 64)
         {
             GPIOC->ODR |= (1 << 6);
@@ -209,6 +209,7 @@ void balance_loop()
         }
         //if(angle == old_angle) continue;
         USART_send_byte(USART1, control_byte);
+#endif
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
         if (bstate == SWING_STATE)
@@ -217,8 +218,8 @@ void balance_loop()
             {
                 // Passed point of max velocity
                 //motor_switch_dir();
-                pwm_dc = swing_angle_to_pwm(angle);
-                pwm_setDutyCycle(pwm_dc, 0);
+                // control_byte = swing_angle_to_pwm(angle);
+                // USART_send_byte(USART1, control_byte);
             }
         }
         else if (bstate == PID_STATE)
@@ -271,6 +272,8 @@ void send_motor_ctrl(void)
 void USART1_IRQHandler(void)
 {
     uint8_t control_byte = (uint8_t)USART1->RDR;
+    
+#ifdef DEBUG
     uint32_t ODR_data = 0;
     if (control_byte < 64)
     {
@@ -300,4 +303,14 @@ void USART1_IRQHandler(void)
     }
     GPIOC->ODR &= ~(((1 << 6 | 1 << 8 | 1 << 9)));
     GPIOC->ODR |= ODR_data;
+#endif
+
+    uint8_t pwm_val = control_byte & 0x7f;
+    uint8_t pwm_dir = ((control_byte & 0x80) == 0x80) ? 1 : 0;
+    if (pwm_val == 0) {
+        // Brake
+        pwm_setDutyCycle(0, pwm_dir + 2);
+    } else {
+        pwm_setDutyCycle(pwm_val, pwm_dir);
+    }
 }
