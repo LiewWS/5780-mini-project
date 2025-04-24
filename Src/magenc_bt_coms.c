@@ -42,7 +42,7 @@ void send_main(void)
     HAL_RCC_GPIOA_CLK_ENABLE();
     HAL_RCC_USART1_CLK_ENABLE();
 
-    configure_TTL(USART1, HAL_RCC_GetHCLKFreq() / 9600);
+    configure_TTL(USART1, HAL_RCC_GetHCLKFreq() / 115200);
     // USART1 TX Pin (connect to RX of bluetooth)
     GPIO_InitTypeDef init_pa9 = {GPIO_PIN_9 | GPIO_PIN_10, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 1};
     HAL_GPIO_Init(GPIOA, &init_pa9);
