@@ -58,8 +58,8 @@ int project_main()
     uint16_t motor_dir_pins = GPIO_PIN_8 | GPIO_PIN_9;
     GPIO_InitTypeDef init_motor_dir = {motor_dir_pins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
     HAL_GPIO_Init(GPIOC, &init_motor_dir);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
     // Stop motor initially
     pwm_setDutyCycle(0);
 
