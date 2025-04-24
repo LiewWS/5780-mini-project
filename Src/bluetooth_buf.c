@@ -8,6 +8,7 @@ uint8_t buf_tail;
 
 void inc_idx(uint8_t *idx)
 {
+    NVIC_DisableIRQ(USART1_IRQn);
     uint8_t cur_idx = *idx;
     if (cur_idx >= BUF_SIZE)
     {
@@ -17,11 +18,12 @@ void inc_idx(uint8_t *idx)
     {
         *idx = cur_idx + 1;
     }
+    NVIC_EnableIRQ(USART1_IRQn);
 }
 
-void USART1_IRQHandler(void)
-{
-    recv_buf[buf_head] = (char)USART1->RDR;
-    inc_idx(&buf_head);
-}
+// void USART1_IRQHandler(void)
+// {
+//     recv_buf[buf_head] = (char)USART1->RDR;
+//     inc_idx(&buf_head);
+// }
 

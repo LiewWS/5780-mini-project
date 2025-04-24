@@ -1,11 +1,11 @@
 #include "magnetic_encoder.h"
 
+
 uint16_t I2C2_Read_ISR(uint32_t bit);
 void I2C_Write(uint8_t data);
 uint8_t I2C_Read();
-void setup_USART(void);
-void printR(char *comment, uint32_t reg);
-void printD(char *comment, int32_t numb);
+
+
 void My_HAL_GPIO_AF(GPIO_TypeDef *GPIOx, uint16_t pin, uint16_t mode);
 
 int magnetic_encoder_main(void)
@@ -230,38 +230,8 @@ uint8_t I2C_Read()
     return I2C2->RXDR;
 }
 
-// set up USART for debugging
-void setup_USART(void)
-{
 
-    // set up GPIO pins for USART
-    // pin 10 = Tx pin 11 = Rx
-    GPIO_InitTypeDef initStrTXRX = {GPIO_PIN_10 | GPIO_PIN_11,
-                                    GPIO_MODE_AF_PP,
-                                    GPIO_SPEED_FREQ_LOW,
-                                    GPIO_NOPULL,
-                                    GPIO_AF1_USART3};
 
-    HAL_GPIO_Init(GPIOC, &initStrTXRX);
-
-    configure_TTL(USART3, HAL_RCC_GetHCLKFreq() / 115200);
-}
-
-// helper function to print what is in registers to help debugging
-void printR(char *comment, uint32_t reg)
-{
-    char r[50];
-    sprintf(r, "%s: 0x%08X", comment, reg);
-    USART_send_string(USART3, r);
-}
-
-// helper function to print actaul decimal numbers to help debugging
-void printD(char *comment, int32_t numb)
-{
-    char str[20];
-    snprintf(str, sizeof(str), "%d", numb); // Convert hex to a decimal string
-    USART_send_string(USART3, ("%s %s", comment, str));
-}
 
 void My_HAL_GPIO_AF(GPIO_TypeDef *GPIOx, uint16_t pin, uint16_t mode)
 {
@@ -352,15 +322,16 @@ void init_i2c()
 uint8_t read_i2c(uint8_t addr)
 {
     I2C2->CR2 &= ~(I2C_CR2_SADD_Msk | I2C_CR2_RD_WRN_Msk | I2C_CR2_START_Msk | 0x7F << 16);
-
+    
     I2C2->CR2 |= ((addr << 1) | (1 << I2C_CR2_NBYTES_Pos) | I2C_CR2_RD_WRN_Msk);
     I2C2->CR2 |= I2C_CR2_START_Msk;
-
+    
     while (!((I2C2->ISR & I2C_ISR_RXNE_Msk) | (I2C2->ISR & I2C_ISR_NACKF_Msk)))
     {
     }
     if (I2C2->ISR & I2C_ISR_NACKF_Msk)
     {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 1);
         return 1;
     }
     else if (I2C2->ISR & I2C_ISR_RXNE_Msk)
@@ -368,7 +339,7 @@ uint8_t read_i2c(uint8_t addr)
         while (!(I2C2->ISR & I2C_ISR_TC_Msk))
         {
         }
-
+        
         uint8_t hold = I2C2->RXDR;
         I2C2->CR2 |= I2C_CR2_STOP_Msk;
         return hold;
@@ -390,6 +361,7 @@ uint8_t write_i2c(uint8_t *sent_dat, uint8_t sent_addr, uint8_t num_bytes)
         
         if (I2C2->ISR & I2C_ISR_NACKF_Msk)
         {
+            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
             return 1;
         }
         else if (I2C2->ISR & I2C_ISR_TXIS_Msk)

@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/willc/Capstone/Capstone_Firmware/Inc",
-                "C:/Users/willc/Capstone/Capstone_Firmware/Src",
+                "C:/Users/willc/5780-mini-project/Inc",
+                "C:/Users/willc/5780-mini-project/Src",
                 "C:/Users/willc/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Include",
                 "C:/Users/willc/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
                 "C:/Users/willc/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Inc",
@@ -45,8 +45,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/willc/Capstone/Capstone_Firmware/Inc",
-                    "C:/Users/willc/Capstone/Capstone_Firmware/Src",
+                    "C:/Users/willc/5780-mini-project/Inc",
+                    "C:/Users/willc/5780-mini-project/Src",
                     "C:/Users/willc/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Include",
                     "C:/Users/willc/.platformio/packages/framework-stm32cubef0/Drivers/CMSIS/Device/ST/STM32F0xx/Include",
                     "C:/Users/willc/.platformio/packages/framework-stm32cubef0/Drivers/STM32F0xx_HAL_Driver/Inc",
