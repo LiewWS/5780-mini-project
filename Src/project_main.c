@@ -4,11 +4,13 @@
 #include "motor.h"
 //`#include <stdint.h>
 
-#define SENDER
+
 
 void send_motor_ctrl(void);
 void calibration_loop();
 void balance_loop();
+void init_magenc(void);
+uint16_t read_i2c_raw_angle(void);
 
 #define MAX_TICK_COUNT 65432
 uint16_t initial_angle;
@@ -62,7 +64,7 @@ int project_main()
     // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
     // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
     //  Stop motor initially
-    pwm_setDutyCycle(0, 0);
+    pwm_setDutyCycle(0, 2);
 
     uint32_t heartbeat = 0;
 
@@ -80,8 +82,30 @@ int project_main()
 
     return 1;
 }
+void init_magenc(void){
+    uint16_t init_angle = 0;
+    uint8_t writtenData[1];
 
-uint16_t read_i2c_angle(void)
+    init_angle = read_i2c_raw_angle();
+
+    uint8_t write_zpos_data[2] = {0x01, init_angle >> 8};
+    write_i2c(write_zpos_data, MAG_ADDR, 2);
+    write_zpos_data[0] = 0x02;
+    write_zpos_data[1] = init_angle & 0x00ff;
+    write_i2c(write_zpos_data, MAG_ADDR, 2);
+
+    writtenData[0] = 0x0E;
+    write_i2c(writtenData, MAG_ADDR, 1);
+    init_angle = read_i2c(MAG_ADDR) << 8;
+
+    writtenData[0] = 0x0F;
+    write_i2c(writtenData, MAG_ADDR, 1);
+    init_angle |= read_i2c(MAG_ADDR);
+
+    //if(init_angle < 50 || init_angle > 3900) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_7, 1);
+
+}
+uint16_t read_i2c_raw_angle(void)
 {
     uint8_t writtenData[1] = {0x0B};
     write_i2c(writtenData, MAG_ADDR, 1);
@@ -101,6 +125,26 @@ uint16_t read_i2c_angle(void)
 
     return angle;
 }
+uint16_t read_i2c_angle(void)
+{
+    uint8_t writtenData[1] = {0x0B};
+    write_i2c(writtenData, MAG_ADDR, 1);
+    uint8_t status = read_i2c(MAG_ADDR);
+    uint16_t angle = 0;
+
+    if (status & 0x20)
+    {
+        writtenData[0] = 0x0E;
+        write_i2c(writtenData, MAG_ADDR, 1);
+        angle = read_i2c(MAG_ADDR) << 8;
+
+        writtenData[0] = 0x0F;
+        write_i2c(writtenData, MAG_ADDR, 1);
+        angle |= read_i2c(MAG_ADDR);
+    }
+
+    return angle;
+}
 
 void calibration_loop()
 {
@@ -109,7 +153,7 @@ void calibration_loop()
 
     while (1)
     {
-        angle = read_i2c_angle();
+        angle = read_i2c_raw_angle();
 
         debouncer = (debouncer << 1);
         if (GPIOA->IDR & 1)
@@ -128,6 +172,8 @@ void calibration_loop()
         // Flash red LED
         GPIOC->ODR ^= (1 << 6);
     }
+    init_magenc();
+
     GPIOC->ODR &= ~(1 << 6);
 }
 
@@ -150,6 +196,7 @@ uint8_t swing_angle_to_pwm(uint16_t cur_angle)
 void balance_loop()
 {
     uint16_t angle = initial_angle;
+    uint16_t angle_diff = 0;
     uint16_t old_angle = 0;
     uint32_t time = 1;
     uint32_t old_time = 0;
@@ -159,9 +206,11 @@ void balance_loop()
     balance_state_t bstate = SWING_STATE;
     uint8_t control_byte;
     GPIOC->ODR ^= (1 << 7);
+    USART_send_byte(USART1, 0x00);
     while (1)
     {
         angle = read_i2c_angle();
+        // angle_diff = angle - old_angle;
         time = TIM2->CNT;
         if (old_time > time)
         {
@@ -178,23 +227,31 @@ void balance_loop()
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
+        if (angle < 2000 && angle > 15)
+            USART_send_byte(USART1, ( 99));
+
+        else if(angle <4085 && angle > 10)
+            USART_send_byte(USART1, ((1 << 7) | 99));
+        else USART_send_byte(USART1, 0x00);
 
 #ifdef DEBUG
-        GPIOC->ODR ^= GPIO_ODR_9;
-        GPIOC->ODR ^= GPIO_ODR_8;
-        //pwm_setDutyCycle(75, 3);
-        uint8_t hold_pwm = 0;
-        //USART_send_byte(USART1, 0x00);
-        //HAL_Delay(5000);
-       
-        USART_send_byte(USART1, ((1<<7) | 30));
+        /*
+                GPIOC->ODR ^= GPIO_ODR_9;
+                GPIOC->ODR ^= GPIO_ODR_8;
+                //pwm_setDutyCycle(75, 3);
+                uint8_t hold_pwm = 0;
+                //USART_send_byte(USART1, 0x00);
+                //HAL_Delay(5000);
 
-        //HAL_Delay(500);
+                USART_send_byte(USART1, ((1<<7) | 30));
 
-        USART_send_byte(USART1, (30));
+                //HAL_Delay(500);
 
-        //HAL_Delay(500);
-        control_byte = angle & 0xFF;
+                USART_send_byte(USART1, (30));
+
+                //HAL_Delay(500);
+                control_byte = angle & 0xFF;
+                */
         /*
         if (control_byte < 64)
         {
@@ -204,7 +261,7 @@ void balance_loop()
         {
             GPIOC->ODR &= ~(1 << 6);
         }
-        
+
         if ((control_byte >= 64) && (control_byte < 128))
         {
             GPIOC->ODR |= (1 << 8);
@@ -213,7 +270,7 @@ void balance_loop()
         {
             GPIOC->ODR &= ~(1 << 8);
         }
-        
+
         if (control_byte >= 128)
         {
             GPIOC->ODR |= (1 << 9);
@@ -223,8 +280,8 @@ void balance_loop()
             GPIOC->ODR &= ~(1 << 9);
         }
             */
-        //if(angle == old_angle) continue;
-        //USART_send_byte(USART1, control_byte);
+        // if(angle == old_angle) continue;
+        // USART_send_byte(USART1, control_byte);
 #endif
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
@@ -233,7 +290,7 @@ void balance_loop()
             if (abs_val(anglev) < abs_val(old_anglev))
             {
                 // Passed point of max velocity
-                //motor_switch_dir();
+                // motor_switch_dir();
                 // control_byte = swing_angle_to_pwm(angle);
                 // USART_send_byte(USART1, control_byte);
             }
@@ -269,6 +326,7 @@ void send_motor_ctrl(void)
     // Initialize I2C for magnetic encoder (from checkpoint 2)
     init_i2c();
 
+    
     // Initialize user button: PA0
     GPIOA->MODER &= ~(GPIO_MODER_MODER0_0 | GPIO_MODER_MODER0_1);
     GPIOC->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0_0 | GPIO_OSPEEDR_OSPEEDR0_1);
@@ -288,8 +346,9 @@ void send_motor_ctrl(void)
 void USART1_IRQHandler(void)
 {
     uint8_t control_byte = (uint8_t)USART1->RDR;
-    
+
 #ifdef DEBUG
+/*
     uint32_t ODR_data = 0;
     if (control_byte < 64)
     {
@@ -315,18 +374,37 @@ void USART1_IRQHandler(void)
     }
     else
     {
-       ODR_data &= ~(1 << 9);
+        ODR_data &= ~(1 << 9);
     }
     GPIOC->ODR &= ~(((1 << 6 | 1 << 8 | 1 << 9)));
     GPIOC->ODR |= ODR_data;
+    */
 #endif
 
     uint8_t pwm_val = control_byte & 0x7f;
     uint8_t pwm_dir = ((control_byte & 0x80) == 0x80) ? 1 : 0;
-    if (pwm_val == 0) {
+    if(control_byte == ((1 << 7) | 35)) {
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
+    }
+    else if(control_byte == 35){
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+
+    }
+    else{
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, 1);
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+    }
+    if (pwm_val == 0)
+    {
         // Brake
         pwm_setDutyCycle(0, pwm_dir + 2);
-    } else {
+    }
+    else
+    {
         pwm_setDutyCycle(pwm_val, pwm_dir);
     }
+
 }
