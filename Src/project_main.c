@@ -207,7 +207,7 @@ void balance_loop()
         {
             GPIOC->ODR &= ~(1 << 9);
         }
-        if(angle == old_angle) continue;
+        //if(angle == old_angle) continue;
         USART_send_byte(USART1, control_byte);
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
