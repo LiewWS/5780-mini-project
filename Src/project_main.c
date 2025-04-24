@@ -180,7 +180,22 @@ void balance_loop()
         anglev = (angle - old_angle) / time_diff;
 
 #ifdef DEBUG
+        GPIOC->ODR ^= GPIO_ODR_9;
+        GPIOC->ODR ^= GPIO_ODR_8;
+        //pwm_setDutyCycle(75, 3);
+        uint8_t hold_pwm = 0;
+        //USART_send_byte(USART1, 0x00);
+        //HAL_Delay(5000);
+       
+        USART_send_byte(USART1, ((1<<7) | 30));
+
+        HAL_Delay(500);
+
+        USART_send_byte(USART1, (95));
+
+        HAL_Delay(500);
         control_byte = angle & 0xFF;
+        /*
         if (control_byte < 64)
         {
             GPIOC->ODR |= (1 << 6);
@@ -207,8 +222,9 @@ void balance_loop()
         {
             GPIOC->ODR &= ~(1 << 9);
         }
+            */
         //if(angle == old_angle) continue;
-        USART_send_byte(USART1, control_byte);
+        //USART_send_byte(USART1, control_byte);
 #endif
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
