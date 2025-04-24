@@ -164,8 +164,9 @@ void balance_loop()
         if (bstate == SWING_STATE) {
             if (abs_val(anglev) < abs_val(old_anglev)) {
                 // Passed point of max velocity
-                motor_switch_dir();
                 pwm_dc = swing_angle_to_pwm(angle) & 0x7f;
+                // Switch direction
+                pwm_dc |= 0x80;
                 USART_send_byte(USART1, pwm_dc);
             }
         } else if (bstate == PID_STATE) {
