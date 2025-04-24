@@ -3,7 +3,7 @@
 #include "hal_usart.h"
 #include "motor.h"
 
-#define SENDER
+//#define SENDER
 
 void send_motor_ctrl(void);
 void calibration_loop();
@@ -58,15 +58,15 @@ int project_main()
     uint16_t motor_dir_pins = GPIO_PIN_8 | GPIO_PIN_9;
     GPIO_InitTypeDef init_motor_dir = {motor_dir_pins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
     HAL_GPIO_Init(GPIOC, &init_motor_dir);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+    //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+    //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
     // Stop motor initially
     pwm_setDutyCycle(0);
 
     uint32_t heartbeat = 0;
 
     while (1) {
-        if (heartbeat == 1000) {
+        if (heartbeat == 10000) {
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
             heartbeat = 0;
         }
@@ -120,6 +120,7 @@ void calibration_loop()
         // Flash red LED
         GPIOC->ODR ^= (1 << 6);
     }
+    GPIOC->ODR &= ~(1 << 6);
 }
 
 typedef enum {
@@ -147,6 +148,7 @@ void balance_loop()
     int32_t anglev = 0;
     int32_t old_anglev = 0;
     balance_state_t bstate = SWING_STATE;
+    uint8_t control_byte;
 
     while (1) {
         angle = read_i2c_angle();
@@ -161,6 +163,26 @@ void balance_loop()
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
+    control_byte = angle & 0xFF;
+
+    if (control_byte < 64) {
+        GPIOC->ODR |= (1 << 6);
+    } else {
+        GPIOC->ODR &= ~(1 << 6);
+    }
+    
+    if ((control_byte >= 64) && (control_byte < 128)) {
+        GPIOC->ODR |= (1 << 8);
+    } else {
+        GPIOC->ODR &= ~(1 << 8);
+    }
+
+    if (control_byte >= 128) {
+        GPIOC->ODR |= (1 << 9);
+    } else {
+        GPIOC->ODR &= ~(1 << 9);
+    }
+	USART_send_byte(USART1, control_byte);
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
         if (bstate == SWING_STATE) {
@@ -169,7 +191,7 @@ void balance_loop()
                 pwm_dc = swing_angle_to_pwm(angle) & 0x7f;
                 // Switch direction
                 pwm_dc |= 0x80;
-                USART_send_byte(USART1, pwm_dc);
+                //USART_send_byte(USART1, pwm_dc);
             }
         } else if (bstate == PID_STATE) {
             //
