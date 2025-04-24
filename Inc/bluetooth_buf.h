@@ -1,7 +1,6 @@
 #ifndef BLUETOOTH_BUF_H
 #define BLUETOOTH_BUF_H
 
-#define SENDER
 // Reserve byte value 0xff to separate angles
 // Max value = 0x7FFE
 // Small error low byte is 0xFF by changing it to 0xFE

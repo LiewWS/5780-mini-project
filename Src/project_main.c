@@ -3,6 +3,8 @@
 #include "hal_usart.h"
 #include "motor.h"
 
+#define SENDER
+
 void send_motor_ctrl(void);
 void calibration_loop();
 void balance_loop();
