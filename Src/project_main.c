@@ -27,7 +27,7 @@ int project_main()
 #if defined(SENDER)
     // I2C: 
     // Bluetooth RXD: PA9, TXD: PA10
-    send_motor_ctrl_main();
+    send_motor_ctrl();
 #else
     // Enable clock to peripherals
     HAL_RCC_GPIOA_CLK_ENABLE();
