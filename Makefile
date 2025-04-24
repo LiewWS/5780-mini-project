@@ -1,4 +1,4 @@
-TARGET ?= BT_ENC
+TARGET ?= BTENC
 
 PREFIX = arm-none-eabi-
 CC = $(PREFIX)gcc

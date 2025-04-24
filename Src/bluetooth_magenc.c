@@ -2,7 +2,7 @@
 #include "hal_usart.h"
 #include "main.h"
 
-#define SENDER
+//#define SENDER
 // Reserve byte value 0xff to separate angles
 // Max value = 0x7FFE
 // Small error low byte is 0xFF by changing it to 0xFE
@@ -12,15 +12,16 @@
 void send_main(void);
 void recv_main(void);
 
-#define BUF_SIZE 128
-uint8_t recv_buf[BUF_SIZE];
+#define BUF_SIZE 9
 uint8_t buf_head;
 uint8_t buf_tail;
+uint8_t* buf_ptr;
 
 void inc_idx(uint8_t *idx)
 {
+    NVIC_DisableIRQ(USART1_IRQn);
     uint8_t cur_idx = *idx;
-    if (cur_idx >= BUF_SIZE)
+    if (cur_idx >= BUF_SIZE-1)
     {
         *idx = 0;
     }
@@ -28,6 +29,7 @@ void inc_idx(uint8_t *idx)
     {
         *idx = cur_idx + 1;
     }
+    NVIC_EnableIRQ(USART1_IRQn);
 }
 
 int bt_magnetic_enc_main(void)
@@ -154,6 +156,8 @@ void recv_main(void)
     NVIC_SetPriority(USART1_IRQn, 1);
 
     // Initialize receive buffer
+    uint8_t recv_buf[BUF_SIZE];
+    buf_ptr = recv_buf;
     buf_head = 0;
     buf_tail = 0;
 
@@ -189,7 +193,7 @@ void recv_main(void)
 
 void USART1_IRQHandler(void)
 {
-    recv_buf[buf_head] = (char)USART1->RDR;
+    buf_ptr[buf_head] = (char)USART1->RDR;
     inc_idx(&buf_head);
 }
 
@@ -198,7 +202,7 @@ uint16_t read_angle(uint16_t angle)
     uint16_t new_angle = angle;
     if (buf_head > buf_tail)
     {
-        if (recv_buf[buf_tail] == SEP_BYTE)
+        if (buf_ptr[buf_tail] == SEP_BYTE)
         {
             // Step over separator byte and return old angle
             inc_idx(&buf_tail);
@@ -206,9 +210,9 @@ uint16_t read_angle(uint16_t angle)
         }
         else
         {
-            angle = recv_buf[buf_tail] << 8;
+            angle = buf_ptr[buf_tail] << 8;
             inc_idx(&buf_tail);
-            if (recv_buf[buf_tail] == SEP_BYTE)
+            if (buf_ptr[buf_tail] == SEP_BYTE)
             {
                 // Step over separator byte and return old angle
                 inc_idx(&buf_tail);
@@ -216,7 +220,7 @@ uint16_t read_angle(uint16_t angle)
             else
             {
                 // Here we got two consecutive data bytes
-                new_angle = angle + recv_buf[buf_tail];
+                new_angle = angle + buf_ptr[buf_tail];
                 inc_idx(&buf_tail);
             }
             return new_angle;
