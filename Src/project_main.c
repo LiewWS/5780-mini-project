@@ -166,7 +166,7 @@ void balance_loop()
                 // Passed point of max velocity
                 motor_switch_dir();
                 pwm_dc = swing_angle_to_pwm(angle) & 0x7f;
-                USART_send_byte(pwm_dc);
+                USART_send_byte(USART1, pwm_dc);
             }
         } else if (bstate == PID_STATE) {
             //
