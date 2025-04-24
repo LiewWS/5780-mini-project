@@ -1,6 +1,8 @@
 {
     "C_Cpp.default.compilerPath": "c:/Users/colin/5780_final_project/5780-mini-project/platformio.ini",
     "files.associations": {
-        "hal_usart.h": "c"
+        "hal_usart.h": "c",
+        "project_main.h": "c",
+        "main.h": "c"
     }
 }

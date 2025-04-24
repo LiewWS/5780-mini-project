@@ -2,8 +2,9 @@
 #include "magnetic_encoder.h"
 #include "hal_usart.h"
 #include "motor.h"
+//`#include <stdint.h>
 
-//#define SENDER
+#define SENDER
 
 void send_motor_ctrl(void);
 void calibration_loop();
@@ -13,11 +14,11 @@ void balance_loop();
 uint16_t initial_angle;
 
 // Here we assume that angle = 2048 when hanging down
-#define HANG_ANGLE        2048
-#define SWING_THRES_LEFT  1024
+#define HANG_ANGLE 2048
+#define SWING_THRES_LEFT 1024
 #define SWING_THRES_RIGHT 3072
-#define SWING_VAL_LEFT    1536
-#define SWING_VAL_RIGHT   2560
+#define SWING_VAL_LEFT 1536
+#define SWING_VAL_RIGHT 2560
 
 int project_main()
 {
@@ -25,7 +26,7 @@ int project_main()
     // SystemClock_Config();
 
 #if defined(SENDER)
-    // I2C: 
+    // I2C:
     // Bluetooth RXD: PA9, TXD: PA10
     send_motor_ctrl();
 #else
@@ -38,7 +39,7 @@ int project_main()
     uint16_t ledPins = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
     GPIO_InitTypeDef initLED = {ledPins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
     HAL_GPIO_Init(GPIOC, &initLED);
-    
+
     // Configure USART for bluetooth
     configure_TTL_RXint(USART1, HAL_RCC_GetHCLKFreq() / 9600);
     // USART1 TX Pin (connect to RX of bluetooth)
@@ -58,15 +59,17 @@ int project_main()
     uint16_t motor_dir_pins = GPIO_PIN_8 | GPIO_PIN_9;
     GPIO_InitTypeDef init_motor_dir = {motor_dir_pins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
     HAL_GPIO_Init(GPIOC, &init_motor_dir);
-    //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
-    //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
-    // Stop motor initially
+    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+    // HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
+    //  Stop motor initially
     pwm_setDutyCycle(0, 0);
 
     uint32_t heartbeat = 0;
 
-    while (1) {
-        if (heartbeat == 10000) {
+    while (1)
+    {
+        if (heartbeat == 10000)
+        {
             HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
             heartbeat = 0;
         }
@@ -85,7 +88,8 @@ uint16_t read_i2c_angle(void)
     uint8_t status = read_i2c(MAG_ADDR);
     uint16_t angle = 0;
 
-    if (status & 0x20) {
+    if (status & 0x20)
+    {
         writtenData[0] = 0x0C;
         write_i2c(writtenData, MAG_ADDR, 1);
         angle = read_i2c(MAG_ADDR) << 8;
@@ -103,18 +107,21 @@ void calibration_loop()
     uint32_t debouncer = 0;
     uint16_t angle = 0;
 
-    while (1) {
+    while (1)
+    {
         angle = read_i2c_angle();
 
         debouncer = (debouncer << 1);
-        if(GPIOA->IDR & 1) {
+        if (GPIOA->IDR & 1)
+        {
             debouncer |= 0x1;
         }
 
-        if (debouncer == 0x7FFFFFFF) {
+        if (debouncer == 0x7FFFFFFF)
+        {
             initial_angle = angle;
             pwm_setDutyCycle(50, 0);
-           // isCalibrating = 0;
+            // isCalibrating = 0;
             break;
         }
 
@@ -124,8 +131,10 @@ void calibration_loop()
     GPIOC->ODR &= ~(1 << 6);
 }
 
-typedef enum {
-    SWING_STATE, PID_STATE
+typedef enum
+{
+    SWING_STATE,
+    PID_STATE
 } balance_state_t;
 
 uint32_t abs_val(int32_t val)
@@ -151,49 +160,69 @@ void balance_loop()
     balance_state_t bstate = SWING_STATE;
     uint8_t control_byte;
 
-    while (1) {
+    while (1)
+    {
         angle = read_i2c_angle();
         time = TIM2->CNT;
-        if (old_time > time) {
+        if (old_time > time)
+        {
             // tick_count overflowed
             time_diff = (MAX_TICK_COUNT - old_time) + time;
-        } else if (time == old_time) {
+        }
+        else if (time == old_time)
+        {
             // Would not want to div by 0
             time_diff = 1;
-        } else {
+        }
+        else
+        {
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
-    control_byte = angle & 0xFF;
-
-    if (control_byte < 64) {
-        GPIOC->ODR |= (1 << 6);
-    } else {
-        GPIOC->ODR &= ~(1 << 6);
-    }
-    
-    if ((control_byte >= 64) && (control_byte < 128)) {
-        GPIOC->ODR |= (1 << 8);
-    } else {
-        GPIOC->ODR &= ~(1 << 8);
-    }
-
-    if (control_byte >= 128) {
-        GPIOC->ODR |= (1 << 9);
-    } else {
-        GPIOC->ODR &= ~(1 << 9);
-    }
-	USART_send_byte(USART1, control_byte);
+        control_byte = angle & 0xFF;
+        
+        if (control_byte < 64)
+        {
+            GPIOC->ODR |= (1 << 6);
+        }
+        else
+        {
+            GPIOC->ODR &= ~(1 << 6);
+        }
+        
+        if ((control_byte >= 64) && (control_byte < 128))
+        {
+            GPIOC->ODR |= (1 << 8);
+        }
+        else
+        {
+            GPIOC->ODR &= ~(1 << 8);
+        }
+        
+        if (control_byte >= 128)
+        {
+            GPIOC->ODR |= (1 << 9);
+        }
+        else
+        {
+            GPIOC->ODR &= ~(1 << 9);
+        }
+        if(angle == old_angle) continue;
+        USART_send_byte(USART1, control_byte);
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
-        if (bstate == SWING_STATE) {
-            if (abs_val(anglev) < abs_val(old_anglev)) {
+        if (bstate == SWING_STATE)
+        {
+            if (abs_val(anglev) < abs_val(old_anglev))
+            {
                 // Passed point of max velocity
-                motor_switch_dir();
+                //motor_switch_dir();
                 pwm_dc = swing_angle_to_pwm(angle);
                 pwm_setDutyCycle(pwm_dc, 0);
             }
-        } else if (bstate == PID_STATE) {
+        }
+        else if (bstate == PID_STATE)
+        {
             //
         }
 
@@ -241,24 +270,34 @@ void send_motor_ctrl(void)
 
 void USART1_IRQHandler(void)
 {
-    uint8_t control_byte = (uint8_t) USART1->RDR;
-
-    if (control_byte < 64) {
-        GPIOC->ODR |= (1 << 6);
-    } else {
-        GPIOC->ODR &= ~(1 << 6);
+    uint8_t control_byte = (uint8_t)USART1->RDR;
+    uint32_t ODR_data = 0;
+    if (control_byte < 64)
+    {
+        ODR_data |= (1 << 6);
     }
-    
-    if ((control_byte >= 64) && (control_byte < 128)) {
-        GPIOC->ODR |= (1 << 8);
-    } else {
-        GPIOC->ODR &= ~(1 << 8);
+    else
+    {
+        ODR_data &= ~(1 << 6);
     }
 
-    if (control_byte >= 128) {
-        GPIOC->ODR |= (1 << 9);
-    } else {
+    if ((control_byte >= 64) && (control_byte < 128))
+    {
+        ODR_data |= (1 << 8);
+    }
+    else
+    {
+        ODR_data &= ~(1 << 8);
+    }
+
+    if (control_byte >= 128)
+    {
+        ODR_data |= (1 << 9);
+    }
+    else
+    {
         GPIOC->ODR &= ~(1 << 9);
     }
+    GPIOC->ODR &= ~(((1 << 6 | 1 << 8 | 1 << 9)));
+    GPIOC->ODR |= ODR_data;
 }
-
