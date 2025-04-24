@@ -189,11 +189,11 @@ void balance_loop()
        
         USART_send_byte(USART1, ((1<<7) | 30));
 
-        HAL_Delay(500);
+        //HAL_Delay(500);
 
-        USART_send_byte(USART1, (95));
+        USART_send_byte(USART1, (30));
 
-        HAL_Delay(500);
+        //HAL_Delay(500);
         control_byte = angle & 0xFF;
         /*
         if (control_byte < 64)
