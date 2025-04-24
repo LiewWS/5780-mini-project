@@ -2,10 +2,10 @@
 #include "hal_usart.h"
 #include "main.h"
 
-//#define SENDER
-// Reserve byte value 0xff to separate angles
-// Max value = 0x7FFE
-// Small error low byte is 0xFF by changing it to 0xFE
+// #define SENDER
+//  Reserve byte value 0xff to separate angles
+//  Max value = 0x7FFE
+//  Small error low byte is 0xFF by changing it to 0xFE
 
 #define SEP_BYTE 0xFF
 
@@ -15,13 +15,13 @@ void recv_main(void);
 #define BUF_SIZE 9
 uint8_t buf_head;
 uint8_t buf_tail;
-uint8_t* buf_ptr;
+uint8_t *buf_ptr;
 
 void inc_idx(uint8_t *idx)
 {
-    NVIC_DisableIRQ(USART1_IRQn);
+
     uint8_t cur_idx = *idx;
-    if (cur_idx >= BUF_SIZE-1)
+    if (cur_idx >= BUF_SIZE - 1)
     {
         *idx = 0;
     }
@@ -29,7 +29,6 @@ void inc_idx(uint8_t *idx)
     {
         *idx = cur_idx + 1;
     }
-    NVIC_EnableIRQ(USART1_IRQn);
 }
 
 int bt_magnetic_enc_main(void)
@@ -151,22 +150,26 @@ void recv_main(void)
     // USART1 RX Pin (connect to TX of bluetooth)
     GPIO_InitTypeDef init_pa10 = {GPIO_PIN_10, GPIO_MODE_AF_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL, 1};
     HAL_GPIO_Init(GPIOA, &init_pa10);
+
+    uint8_t recv_buf[BUF_SIZE];
+    buf_ptr = recv_buf;
+    buf_head = 0;
+    buf_tail = 0;
+
     // Set up NVIC
     NVIC_EnableIRQ(USART1_IRQn);
     NVIC_SetPriority(USART1_IRQn, 1);
 
     // Initialize receive buffer
-    uint8_t recv_buf[BUF_SIZE];
-    buf_ptr = recv_buf;
-    buf_head = 0;
-    buf_tail = 0;
 
     uint16_t angle = 0;
 
     while (1)
     {
         // Main loop
+        NVIC_DisableIRQ(USART1_IRQn);
         angle = read_angle(angle);
+        NVIC_EnableIRQ(USART1_IRQn);
 
         if (angle < 1000)
             HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, 1);
@@ -193,13 +196,17 @@ void recv_main(void)
 
 void USART1_IRQHandler(void)
 {
+    NVIC_DisableIRQ(USART1_IRQn);
     buf_ptr[buf_head] = (char)USART1->RDR;
     inc_idx(&buf_head);
+    NVIC_EnableIRQ(USART1_IRQn);
 }
 
 uint16_t read_angle(uint16_t angle)
 {
+
     uint16_t new_angle = angle;
+
     if (buf_head > buf_tail)
     {
         if (buf_ptr[buf_tail] == SEP_BYTE)
