@@ -198,19 +198,17 @@ void motor_main(void)
         GPIOC->ODR ^= GPIO_ODR_9;
         GPIOC->ODR ^= GPIO_ODR_8;
 
+        pwm_setDutyCycle(75, 3);
 
-        pwm_setDutyCycle(90, 1);
-        HAL_Delay(i);
-    
-        pwm_setDutyCycle(95, 0);
-        HAL_Delay(i);
-    
-        pwm_setDutyCycle(50, 3);
-        HAL_Delay(10);
-
-        i = i + i/10;
-
+        HAL_Delay(5000);
        
+        pwm_setDutyCycle(95, 1);
+
+        HAL_Delay(500);
+
+        pwm_setDutyCycle(95, 0);
+
+        HAL_Delay(500);
 
 
 
@@ -238,13 +236,6 @@ void motor_main(void)
 
         // direction = (direction == 0);
 
-        // pwm_setDutyCycle(75, 1);
-
-        // HAL_Delay(1000);
-
-        // pwm_setDutyCycle(95, 0);
-
-        // HAL_Delay(675);
 
         
 
