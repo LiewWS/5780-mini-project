@@ -113,7 +113,12 @@ void calibration_loop()
 
         if (debouncer == 0x7FFFFFFF) {
             initial_angle = angle;
+<<<<<<< Updated upstream
             pwm_setDutyCycle(50);
+=======
+            pwm_setDutyCycle(50, 0);
+            isCalibrating = 0;
+>>>>>>> Stashed changes
             break;
         }
 
@@ -188,10 +193,16 @@ void balance_loop()
         if (bstate == SWING_STATE) {
             if (abs_val(anglev) < abs_val(old_anglev)) {
                 // Passed point of max velocity
+<<<<<<< Updated upstream
                 pwm_dc = swing_angle_to_pwm(angle) & 0x7f;
                 // Switch direction
                 pwm_dc |= 0x80;
                 //USART_send_byte(USART1, pwm_dc);
+=======
+                motor_switch_dir();
+                pwm_dc = swing_angle_to_pwm(angle);
+                pwm_setDutyCycle(pwm_dc, 0);
+>>>>>>> Stashed changes
             }
         } else if (bstate == PID_STATE) {
             //
