@@ -233,22 +233,6 @@ void balance_loop()
 
         int32_t dist_center; 
 
-        if(angle > 3800  && angle < 4092)
-        {
-            USART_send_byte(USART1,(1 << 7) | (99));
-        }
-        else if(angle < 200 && angle > 5){
-            USART_send_byte(USART1,  99);
-        }
-        else if(angle < 2200  && angle > 2004)
-        {
-            USART_send_byte(USART1, (99));
-        }
-        else if(angle < 1996 && angle > 1800){
-            USART_send_byte(USART1, (1 << 7) | 99);
-        }
-        else 
-            USART_send_byte(USART1, 0);
         /*
         if(angle <1000){
             dist_center = angle; 
@@ -330,19 +314,19 @@ void balance_loop()
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
         if (bstate == SWING_STATE2) {
-            if(angle<=1024) {
-                USART_send_byte(USART1, (1 << 7) | 70);
-                if (angle <= 200) {
-                    bstate = PID_STATE;
-                    USART_send_byte(USART1, 0);
-                }
-            } else {
-                USART_send_byte(USART1, 95);
+            if ((angle < 2560) && (angle >= 1536)) {
+                USART_send_byte(USART1, (1 << 7)| 95);
+            } else if ((angle < 1536) && (angle >= 1024)) {
+                USART_send_byte(USART1, 60);
+            } else if ((angle < 1024) && (angle >= 200)) {
+                USART_send_byte(USART1, 0);
+            } else if (angle < 200) {
+                bstate = PID_STATE;
             }
         } else if (bstate == SWING_STATE1) {
             if (angle >= 3072) {
                 USART_send_byte(USART1, 70);
-                if (angle >= 3800) {
+                if (angle >= 3895) {
                     bstate = PID_STATE;
                     USART_send_byte(USART1, 0);
                 }
@@ -351,14 +335,25 @@ void balance_loop()
             }
         } else {
             //bstate == PID_STATE
-            if (angle > 200) {
-                USART_send_byte(USART1, (1 << 7) | 95);
+            if ((angle > 200) && (angle < 2048)) {
+                USART_send_byte(USART1, 0);
                 bstate = SWING_STATE1;
-            } else if (angle < 3800) {
-                USART_send_byte(USART1, 95);
+            } else if ((angle < 3895) && (angle >= 2048)) {
+                USART_send_byte(USART1, 0);
                 bstate = SWING_STATE2;
             } else {
                 // Stay in PID_STATE, PID_STATE logic goes
+                if(angle > 3895  && angle < 4092)
+                {
+                    USART_send_byte(USART1,(1 << 7) | (99));
+                }
+                else if(angle < 200 && angle > 5){
+                    USART_send_byte(USART1,  99);
+                }
+                else 
+                {
+                    USART_send_byte(USART1, 0);
+                }
             }
         }
 
