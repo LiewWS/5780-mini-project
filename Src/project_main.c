@@ -321,17 +321,19 @@ void balance_loop()
             } else if ((angle < 1024) && (angle >= 200)) {
                 USART_send_byte(USART1, 0);
             } else if (angle < 200) {
+                USART_send_byte(USART1, 0);
                 bstate = PID_STATE;
             }
         } else if (bstate == SWING_STATE1) {
-            if (angle >= 3072) {
-                USART_send_byte(USART1, 70);
-                if (angle >= 3895) {
-                    bstate = PID_STATE;
-                    USART_send_byte(USART1, 0);
-                }
-            } else {
-                USART_send_byte(USART1, (1 << 7) | 95);
+            if ((angle >= 1536) && (angle < 2560)) {
+                USART_send_byte(USART1, 95);
+            } else if ((angle >= 2560) && (angle < 3072)) {
+                USART_send_byte( USART1, (1 << 7) | 60);
+            } else if ((angle >= 3072) && (angle < 3895)) {
+                USART_send_byte(USART1, 0);
+            } else if (angle >= 3895) {
+                USART_send_byte(USART1, 0);
+                bstate = PID_STATE;
             }
         } else {
             //bstate == PID_STATE
