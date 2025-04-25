@@ -4,7 +4,8 @@
 #include "motor.h"
 //`#include <stdint.h>
 
-
+#define KP 1
+#define KI 1
 
 void send_motor_ctrl(void);
 void calibration_loop();
@@ -38,7 +39,7 @@ int project_main()
     HAL_RCC_USART1_CLK_ENABLE();
 
     // init LEDs in case needed for debugging
-    uint16_t ledPins = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
+    uint16_t ledPins = GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9;
     GPIO_InitTypeDef initLED = {ledPins, GPIO_MODE_OUTPUT_PP, GPIO_SPEED_FREQ_LOW, GPIO_NOPULL};
     HAL_GPIO_Init(GPIOC, &initLED);
 
@@ -205,6 +206,7 @@ void balance_loop()
     int32_t old_anglev = 0;
     balance_state_t bstate = SWING_STATE;
     uint8_t control_byte;
+    uint16_t error = 0;
     GPIOC->ODR ^= (1 << 7);
     USART_send_byte(USART1, 0x00);
     while (1)
@@ -297,7 +299,16 @@ void balance_loop()
         }
         else if (bstate == PID_STATE)
         {
-            //
+            if (angle < 2048) {
+                // stick is to the right of center
+                error = 2048 - angle;
+                
+                // Turn disc counter clockwise (dir = 1)
+            } else  {
+                // stick is to the left of center
+                error = angle - 2048;
+                // Turn disc counter clockwise (dir = 1)
+            }
         }
 
         old_angle = angle;
