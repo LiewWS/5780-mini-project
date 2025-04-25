@@ -180,7 +180,8 @@ void calibration_loop()
 
 typedef enum
 {
-    SWING_STATE,
+    SWING_STATE1,
+    SWING_STATE2,
     PID_STATE
 } balance_state_t;
 
@@ -204,7 +205,7 @@ void balance_loop()
     uint32_t time_diff = 1;
     int32_t anglev = 0;
     int32_t old_anglev = 0;
-    balance_state_t bstate = SWING_STATE;
+    balance_state_t bstate = PID_STATE;
     uint8_t control_byte;
     uint16_t error = 0;
     GPIOC->ODR ^= (1 << 7);
@@ -328,27 +329,36 @@ void balance_loop()
 #endif
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
-        if (bstate == SWING_STATE)
-        {
-            if (abs_val(anglev) < abs_val(old_anglev))
-            {
-                // Passed point of max velocity
-                // motor_switch_dir();
-                // control_byte = swing_angle_to_pwm(angle);
-                // USART_send_byte(USART1, control_byte);
+        if (bstate == SWING_STATE2) {
+            if(angle<=1024) {
+                USART_send_byte(USART1, (1 << 7) | 70);
+                if (angle <= 200) {
+                    bstate = PID_STATE;
+                    USART_send_byte(USART1, 0);
+                }
+            } else {
+                USART_send_byte(USART1, 95);
             }
-        }
-        else if (bstate == PID_STATE)
-        {
-            if (angle < 2048) {
-                // stick is to the right of center
-                error = 2048 - angle;
-                
-                // Turn disc counter clockwise (dir = 1)
-            } else  {
-                // stick is to the left of center
-                error = angle - 2048;
-                // Turn disc counter clockwise (dir = 1)
+        } else if (bstate == SWING_STATE1) {
+            if (angle >= 3072) {
+                USART_send_byte(USART1, 70);
+                if (angle >= 3800) {
+                    bstate = PID_STATE;
+                    USART_send_byte(USART1, 0);
+                }
+            } else {
+                USART_send_byte(USART1, (1 << 7) | 95);
+            }
+        } else {
+            //bstate == PID_STATE
+            if (angle > 200) {
+                USART_send_byte(USART1, (1 << 7) | 95);
+                bstate = SWING_STATE1;
+            } else if (angle < 3800) {
+                USART_send_byte(USART1, 95);
+                bstate = SWING_STATE2;
+            } else {
+                // Stay in PID_STATE, PID_STATE logic goes
             }
         }
 
