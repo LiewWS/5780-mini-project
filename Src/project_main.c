@@ -227,11 +227,11 @@ void balance_loop()
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
-        if (angle < 2000 && angle > 15)
+        if (angle < 2000 && angle > 10)
             USART_send_byte(USART1, ( 99));
 
         else if(angle <4085 && angle > 10)
-            USART_send_byte(USART1, ((1 << 7) | 99));
+            USART_send_byte(USART1, ( (1 << 7) |99));
         else USART_send_byte(USART1, 0x00);
 
 #ifdef DEBUG
