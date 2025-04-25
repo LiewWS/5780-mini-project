@@ -232,15 +232,22 @@ void balance_loop()
 
         int32_t dist_center; 
 
-        if(angle > 3900 )
+        if(angle > 3800  && angle < 4092)
+        {
+            USART_send_byte(USART1,(1 << 7) | (99));
+        }
+        else if(angle < 200 && angle > 5){
+            USART_send_byte(USART1,  99);
+        }
+        else if(angle < 2200  && angle > 2004)
         {
             USART_send_byte(USART1, (99));
         }
-        else if(angle < 100){
+        else if(angle < 1996 && angle > 1800){
             USART_send_byte(USART1, (1 << 7) | 99);
         }
         else 
-            USART_send_byte(USART1, 00);
+            USART_send_byte(USART1, 0);
         /*
         if(angle <1000){
             dist_center = angle; 
