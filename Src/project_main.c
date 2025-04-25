@@ -2,6 +2,7 @@
 #include "magnetic_encoder.h"
 #include "hal_usart.h"
 #include "motor.h"
+#include <stdlib.h>
 //`#include <stdint.h>
 
 #define KP 1
@@ -14,7 +15,9 @@ void init_magenc(void);
 uint16_t read_i2c_raw_angle(void);
 
 #define MAX_TICK_COUNT 65432
+#define V_THRESHHOLD (10)
 uint16_t initial_angle;
+//uint8_t direction;
 
 // Here we assume that angle = 2048 when hanging down
 #define HANG_ANGLE 2048
@@ -83,7 +86,8 @@ int project_main()
 
     return 1;
 }
-void init_magenc(void){
+void init_magenc(void)
+{
     uint16_t init_angle = 0;
     uint8_t writtenData[1];
 
@@ -103,8 +107,7 @@ void init_magenc(void){
     write_i2c(writtenData, MAG_ADDR, 1);
     init_angle |= read_i2c(MAG_ADDR);
 
-    //if(init_angle < 50 || init_angle > 3900) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_7, 1);
-
+    // if(init_angle < 50 || init_angle > 3900) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8 | GPIO_PIN_7, 1);
 }
 uint16_t read_i2c_raw_angle(void)
 {
@@ -208,6 +211,7 @@ void balance_loop()
     balance_state_t bstate = PID_STATE;
     uint8_t control_byte;
     uint16_t error = 0;
+    uint8_t direction = 0;
     GPIOC->ODR ^= (1 << 7);
     USART_send_byte(USART1, 0x00);
     while (1)
@@ -230,21 +234,81 @@ void balance_loop()
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
+        /*
+        if(abs(angle - old_angle) < 2) {
+            USART_send_byte(USART1, 0);
+            //old_angle  = angle;
+            continue;
 
-        int32_t dist_center; 
+        }
+            */
+        //if(angle == old_angle){
+            //USART_send_byte(USART1, 0);
+          //continue;
+        //}
+        int32_t dist_center;
+        //if both are on the same side of the wheel
+        if(((angle < 2000) == (old_angle < 2000))){
+            direction = (old_angle < angle);
+        }
+        else
+        {
+            //if they are on different sides, and the old one was on the "small" side, than the new must be on the "big" side (travelling in the one direction)
+            if((old_angle > 1000) && (old_angle < 3000)){
+                direction = !(old_angle < 2000);
+            }
+            else direction = (old_angle < 2000);
+
+        }
+        if(((angle < V_THRESHHOLD) && direction) || (((4095 - angle) < V_THRESHHOLD) && !direction))
+            USART_send_byte(USART1, 0x00);
+        else if (angle > 3700 || angle < 300)
+        {
+            if(direction) HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 1);
+            else HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
+
+            if ((angle > 3700) && !direction)
+                USART_send_byte(USART1, (1 << 7) | (99));
+            else if((angle > 3700) && direction)
+                USART_send_byte(USART1, (80));
+            else if((angle < 300) && !direction )
+                 USART_send_byte(USART1,(99));
+            else if((angle < 300) && direction)
+                USART_send_byte(USART1, (1 << 7) |  80);
+        }
+        /*
+        else if (angle < 300 && angle > 5)
+        {
+            if (angle < 100)
+                USART_send_byte(USART1,   (99));
+            else
+                USART_send_byte(USART1,  (99));
+            //USART_send_byte(USART1, 75);
+        }
+            */
+        /*
+        else if (angle < 2100 && angle > 2004)
+        {
+            USART_send_byte(USART1, (99));
+        }
+        else if (angle < 1996 && angle > 1100)
+        {
+            USART_send_byte(USART1, (1 << 7) | 99);
+        }
+            */
 
         /*
         if(angle <1000){
-            dist_center = angle; 
+            dist_center = angle;
         }
         else if(angle > 3000 ){
-            dist_center = 4995 - angle; 
+            dist_center = 4995 - angle;
         }
 
         if (angle < 1023) { // was 200
             //USART_send_byte(USART1, ( 80 + ((angle)/10)));
             USART_send_byte(USART1, ( dist_center)/60);
-           
+
         }
         else if(angle > 3071) { // was 3800
             //USART_send_byte(USART1, ( (1 << 7) |(80 + (80-(abs(angle - 3800)/2)))));
@@ -314,22 +378,23 @@ void balance_loop()
 
         // bstate = ((angle > SWING_THRES_LEFT) && (angle < SWING_THRES_RIGHT)) ? SWING_STATE : PID_STATE;
         if (bstate == SWING_STATE2) {
-            if ((angle < 2560) && (angle >= 1536)) {
+            if ((angle < 2460) && (angle >= 1636)) {
                 USART_send_byte(USART1, (1 << 7)| 95);
-            } else if ((angle < 1536) && (angle >= 1024)) {
-                USART_send_byte(USART1, 60);
-            } else if ((angle < 1024) && (angle >= 200)) {
+            } else if ((angle < 1636) && (angle >= 1000)) {
+                USART_send_byte(USART1, 0);
+            } else if ((angle < 1000) && (angle >= 200)) {
                 USART_send_byte(USART1, 0);
             } else if (angle < 200) {
                 USART_send_byte(USART1, 0);
                 bstate = PID_STATE;
             }
         } else if (bstate == SWING_STATE1) {
-            if ((angle >= 1536) && (angle < 2560)) {
+            if ((angle >= 1636) && (angle < 2460)) {
                 USART_send_byte(USART1, 95);
-            } else if ((angle >= 2560) && (angle < 3072)) {
-                USART_send_byte( USART1, (1 << 7) | 60);
-            } else if ((angle >= 3072) && (angle < 3895)) {
+            } else if ((angle >= 2460) && (angle < 3000)) {
+                USART_send_byte( USART1, (1 << 7) | 0);
+
+            } else if ((angle >= 3000) && (angle < 3895)) {
                 USART_send_byte(USART1, 0);
             } else if (angle >= 3895) {
                 USART_send_byte(USART1, 0);
@@ -385,7 +450,6 @@ void send_motor_ctrl(void)
     // Initialize I2C for magnetic encoder (from checkpoint 2)
     init_i2c();
 
-    
     // Initialize user button: PA0
     GPIOA->MODER &= ~(GPIO_MODER_MODER0_0 | GPIO_MODER_MODER0_1);
     GPIOC->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0_0 | GPIO_OSPEEDR_OSPEEDR0_1);
@@ -441,13 +505,11 @@ void USART1_IRQHandler(void)
 #endif
     /*
     uint8_t tentative_pwm_val = control_byte & 0x7f;
-    uint8_t pwm_val = tentative_pwm_val * 15; 
+    uint8_t pwm_val = tentative_pwm_val * 15;
     */
-   uint8_t pwm_val = control_byte & 0x7f;
-   
-    //if(pwm_val > 100) pwm_val = 99; 
+    uint8_t pwm_val = control_byte & 0x7f;
 
-
+    // if(pwm_val > 100) pwm_val = 99;
 
     uint8_t pwm_dir = ((control_byte & 0x80) == 0x80) ? 1 : 0;
     /*    if(control_byte == ((1 << 7) | 35)) {
@@ -474,5 +536,4 @@ void USART1_IRQHandler(void)
     {
         pwm_setDutyCycle(pwm_val, pwm_dir);
     }
-
 }
