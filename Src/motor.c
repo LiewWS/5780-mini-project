@@ -182,13 +182,13 @@ void motor_main(void)
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
 
     pwm_init();
-    pwm_setDutyCycle(75, 3);
+    //pwm_setDutyCycle(75, 3);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
     //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
     //uint8_t forward = 1;
 
-    volatile int i = 100;
-    HAL_Delay(5000);
+    volatile int i = 500;
+    HAL_Delay(500);
 
     while(1)
     {
