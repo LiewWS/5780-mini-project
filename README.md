@@ -26,12 +26,15 @@ When the stick falls it rotates the horizonal gear. The horizonal gear spins a m
 
 ## Photos
 ![IMG_5142](https://github.com/user-attachments/assets/d7c52bec-53e8-4729-8df6-f70c4dea501a)
+
 The whole set up
 
 ![IMG_5143](https://github.com/user-attachments/assets/85b958da-5574-485e-a68e-f8bc7f28ab11)
+
 One of the Bluetooth modules
 
 ![IMG_5146](https://github.com/user-attachments/assets/c05ac081-2b94-47ca-b10d-0eb0e6dc9308)
+
 The magnetic encoder sitting under the horizontal gear
 
 ## Hardware
