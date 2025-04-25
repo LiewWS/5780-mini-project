@@ -18,7 +18,7 @@ The main goal of this project was to use a motor that spun a disk to balance a s
 
 ## Description
 
-There is a 3D disk attached to a DC motor mounted on a block of wood. At the end of the disk is a stick which is attached to a long axel going through the disk. The stick is also attached to a gear that is in a 90 degree pitch of another gear. The second gear is a freely spinning gear with a magnet on the end that hovers over a magnetic encoder. Also on the disk, there is a bread board that contains an STM32, a power supply, and a Bluetooth module. Additonaly there is another STM32 that is connected to the recieving Bluetooth module and drives the motor driver.
+There is a 3D printed disk attached to a DC motor mounted on a block of wood. At the end of the disk is a stick which is attached to a long axel going through the disk. The stick is also attached to a gear that is in a 90 degree pitch of another gear. The second gear is a freely spinning gear with a magnet on the end that hovers over a magnetic encoder. Also on the disk, there is a bread board that contains an STM32, a power supply, and a Bluetooth module. Additonaly there is another STM32 that is connected to the recieving Bluetooth module and drives the motor driver.
 
 ## How it works
 
