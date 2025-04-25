@@ -61,8 +61,7 @@ void pwm_init(void) {
     //GPIOC->AFR[0] |= (mode << (6 * 4));
 
     // Set up a PA5, PA6 as GPIO output pins for motor direction control
-    //GPIOA->MODER &= ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6); // clear PA5, PA6 bits,
-    //GPIOA->MODER |= (1 << GPIO_MODER_MODER5_Pos) | (1 << GPIO_MODER_MODER6_Pos);
+
     uint16_t ledPins = GPIO_PIN_6 | GPIO_PIN_5;
 
     // init LEDs in case needed for debugging
@@ -71,7 +70,7 @@ void pwm_init(void) {
                                 GPIO_SPEED_FREQ_LOW,
                                 GPIO_NOPULL};
     HAL_GPIO_Init(GPIOA, &initMTROUT);
-    //GPIOA->MODER = (GPIOA->MODER & ~(GPIO_MODER_MODER5 | GPIO_MODER_MODER6)) | GPIO_MODER_MODER13_1 | GPIO_MODER_MODER11_1;
+   
 
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1);
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
