@@ -229,12 +229,46 @@ void balance_loop()
             time_diff = time - old_time;
         }
         anglev = (angle - old_angle) / time_diff;
-        if (angle < 1000 && angle > 5)
-            USART_send_byte(USART1, ( 40 + ((angle)/80)));
 
-        else if(angle <3000 && angle > 5)
-            USART_send_byte(USART1, ( (1 << 7) |(40 + ((3000-angle/80)))));
-        else USART_send_byte(USART1, 0x00);
+        int32_t dist_center; 
+
+        if(angle > 3900 )
+        {
+            USART_send_byte(USART1, (99));
+        }
+        else if(angle < 100){
+            USART_send_byte(USART1, (1 << 7) | 99);
+        }
+        else 
+            USART_send_byte(USART1, 00);
+        /*
+        if(angle <1000){
+            dist_center = angle; 
+        }
+        else if(angle > 3000 ){
+            dist_center = 4995 - angle; 
+        }
+
+        if (angle < 1023) { // was 200
+            //USART_send_byte(USART1, ( 80 + ((angle)/10)));
+            USART_send_byte(USART1, ( dist_center)/60);
+           
+        }
+        else if(angle > 3071) { // was 3800
+            //USART_send_byte(USART1, ( (1 << 7) |(80 + (80-(abs(angle - 3800)/2)))));
+            USART_send_byte(USART1, ( (1 << 7) |(dist_center / 60)));
+        }
+        else {
+            if (angle < 2048) {
+               // USART_send_byte(USART1, (1 << 7) | 60);
+               USART_send_byte(USART1, (1 << 7) | 1);
+            } else {
+                //USART_send_byte(USART1, 60);
+                USART_send_byte(USART1, 1);
+            }
+            // USART_send_byte(USART1, 0x00);
+        }
+            */
 
 #ifdef DEBUG
         /*
@@ -391,10 +425,18 @@ void USART1_IRQHandler(void)
     GPIOC->ODR |= ODR_data;
     */
 #endif
+    /*
+    uint8_t tentative_pwm_val = control_byte & 0x7f;
+    uint8_t pwm_val = tentative_pwm_val * 15; 
+    */
+   uint8_t pwm_val = control_byte & 0x7f;
+   
+    //if(pwm_val > 100) pwm_val = 99; 
 
-    uint8_t pwm_val = control_byte & 0x7f;
+
+
     uint8_t pwm_dir = ((control_byte & 0x80) == 0x80) ? 1 : 0;
-    if(control_byte == ((1 << 7) | 35)) {
+    /*    if(control_byte == ((1 << 7) | 35)) {
         HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
         HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
     }
@@ -408,6 +450,7 @@ void USART1_IRQHandler(void)
         HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, 0);
         HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 0);
     }
+        */
     if (pwm_val == 0)
     {
         // Brake
