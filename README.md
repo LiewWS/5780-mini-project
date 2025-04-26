@@ -14,7 +14,7 @@ Trae Hillstead
 
 ## About
 
-The main goal of this project was to use a motor that spun a disk to balance a stick on the end of it.
+The main goal of this project was to use a motor that spins a disk to balance a stick on the end of it.
 
 ## Description
 
@@ -22,7 +22,9 @@ There is a 3D printed disk attached to a DC motor mounted on a block of wood. At
 
 ## How it works
 
-When the stick falls it rotates the horizonal gear. The horizonal gear spins a magnet which a magnetic encoder reads. The readings from the magnetic encoder are transmitted to the STM32 through I2C. The microcontroller performs a control feedback loop to determine a PWM. The PWM is then converted to an 8 bit usart byte for the master bluetooth module to send to the the slave Bluetooth. The 8 bit byte contains 7 bits for the PWM 1 - 100. and the 8th MSB to determine direction. The slave bluetooth recieves the PWM information and connects to another STM32 which drives the motor. 
+When the stick falls it rotates the horizonal gear. The horizonal gear spins a magnet which a magnetic encoder reads. The readings from the magnetic encoder are transmitted to the STM32 through I2C. After configuring the zero position of the magnetic encoder, the microcontroller performs a control feedback loop to determine the PWM duty cycle and motor direction. 
+
+The values for PWM duty cycle and motor direction are encoded as an 8-bit command and sent via USART to the Buetooth module for transmission to the motor controller board. The 8-bit command has the following format: command[6:0] encode the PWM duty cycle (0 to 100) and command[7] encodes the motor direction. The motor controller board updates the PWM duty cycle and motor direction whenever an interrupt is triggered by USART1, indicating that a new command has been received.
 
 ## Photos
 ![IMG_5142](https://github.com/user-attachments/assets/d7c52bec-53e8-4729-8df6-f70c4dea501a)
@@ -45,6 +47,18 @@ The magnetic encoder sitting under the horizontal gear
 | Motor Driver         | DRV8871                            |
 | Motors               | DC motor / Stepper                 |
 | Sensors              | Magnetic Encoder                   |
-|Communication protocol| Bluetooth modules
+|Communication protocol| Bluetooth modules                  |
 | Other                | 3D printed parts, base, connectors |
+
+# Software
+
+The source code for the project can be found in the Src directory and the header files can be found 
+in the Inc directory. The important source files are described in the following table:
+
+| File                 | Description                        |
+|----------------------|------------------------------------|
+| project_main.c       | Code for configuring the microcontroller boards and running the main loops.                   |
+| motor.c              | Functions for configuring timer peripheral for motor PWM and controlling motor direction.     |
+| magnetic_encoder.c   | Functions for interacting with the I2C peripheral, used for accessing the magnetic encoder.ß   |
+| usart.c              | Functions for interacting with the USART peripheral, used for bluetooth communication.        |
 
