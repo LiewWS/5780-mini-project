@@ -59,6 +59,8 @@ in the Inc directory. The important source files are described in the following 
 |----------------------|------------------------------------|
 | project_main.c       | Code for configuring the microcontroller boards and running the main loops.                   |
 | motor.c              | Functions for configuring timer peripheral for motor PWM and controlling motor direction.     |
-| magnetic_encoder.c   | Functions for interacting with the I2C peripheral, used for accessing the magnetic encoder.ß   |
+| magnetic_encoder.c   | Functions for interacting with the I2C peripheral, used for accessing the magnetic encoder.   |
 | usart.c              | Functions for interacting with the USART peripheral, used for bluetooth communication.        |
+
+Using platformio, the executable binary for the microcontroller that reads the magnetic encoder and performs the computations for the motor commands can be built by specifying the `project_main_send` env. The executable binary for the microcontroller that decodes the motor command and controls the motors can be built by specifying the `project_main_recv` env.
 
